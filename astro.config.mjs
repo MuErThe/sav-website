@@ -6,7 +6,7 @@ import { defineConfig } from 'astro/config';
  * locally and on the final domain the site sits at the root.
  */
 export default defineConfig({
-  site: process.env.SITE_URL ?? 'https://sav.construction',
+  site: process.env.SITE_URL ?? 'https://www.sav.construction',
   base: process.env.BASE_PATH ?? '/',
   // The dev toolbar overlays the page during review; it never ships to production.
   devToolbar: { enabled: false },

@@ -33,7 +33,7 @@ src/
 | Variable | Purpose |
 | --- | --- |
 | `PUBLIC_CONTACT_ENDPOINT` | Where the contact form posts. Unset, the form shows the phone number and email instead. |
-| `SITE_URL` | Canonical address. Defaults to `https://sav.construction`. |
+| `SITE_URL` | Canonical address. Defaults to `https://www.sav.construction`. |
 | `BASE_PATH` | Only if the site is served under a sub-path. Defaults to `/`. |
 | `PUBLIC_PREVIEW` | Set to `true` on preview deployments to add `noindex, nofollow`. |
 

@@ -90,6 +90,6 @@ export const faqs: readonly Faq[] = [
   {
     question: 'How do I contact SAV Construction about a project?',
     answer:
-      'Call +91 7970022422, email info@sav.construction, or send an enquiry through the contact page at sav.construction/contact.',
+      'Call +91 7970022422, email info@sav.construction, or send an enquiry through the contact page at www.sav.construction/contact.',
   },
 ];

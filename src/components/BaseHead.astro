@@ -35,7 +35,7 @@ const {
   themeColor = '#08509f',
 } = Astro.props;
 
-const site = Astro.site ?? new URL('https://sav.construction');
+const site = Astro.site ?? new URL('https://www.sav.construction');
 const canonical = new URL(Astro.url.pathname, site).href;
 const imageUrl = new URL(url(image), site).href;
 /** Preview builds stay out of search engines. */

@@ -26,7 +26,7 @@ const images = galleryFor(project.slug);
 const awaitingPhotos = usesPlaceholders(project.slug);
 const related = projects.filter((p) => p.sector === project.sector && p.slug !== project.slug).slice(0, 3);
 
-const site = Astro.site ?? new URL('https://sav.construction');
+const site = Astro.site ?? new URL('https://www.sav.construction');
 const breadcrumbs = {
   '@type': 'BreadcrumbList',
   itemListElement: [

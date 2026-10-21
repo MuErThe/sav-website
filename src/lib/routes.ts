@@ -19,4 +19,4 @@ export const projectPages = projects.map((project) => ({
 
 /** An absolute URL for a site path, respecting the base path. */
 export const absolute = (path: string, site: URL | undefined): string =>
-  new URL(url(path), site ?? 'https://sav.construction').href;
+  new URL(url(path), site ?? 'https://www.sav.construction').href;
