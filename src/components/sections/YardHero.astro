@@ -1,0 +1,709 @@
+---
+/**
+ * Homepage opening: a frame that fills the screen under the header, running
+ * edge to edge, with a clip of site work when one is set and then photos of
+ * finished plants. The headline sits over it in signage type, its sector
+ * phrase turning through everything SAV builds. Under the frame, the three
+ * proof figures and the link to the projects share one row.
+ *
+ * The frame is a swipeable strip that works without JavaScript. The script
+ * adds autoplay, which never starts for people who ask for reduced motion and
+ * always has a pause control; the clip only plays while it is the slide shown.
+ */
+import { Image, getImage } from 'astro:assets';
+import { hero, heroRotation, heroSlides, heroVideo } from '../../data/story';
+import { company } from '../../data/company';
+import { projectBySlug } from '../../data/projects';
+import { galleryFor } from '../../lib/gallery';
+import { url } from '../../lib/paths';
+
+interface Props {
+  base: string;
+}
+
+const { base } = Astro.props;
+const words = (text: string) => text.split(' ');
+const lead = words(hero.titleLead);
+const rest = words(heroRotation.rest);
+
+const photos = heroSlides.flatMap(({ slug, caption, focus }) => {
+  const project = projectBySlug(slug);
+  const photo = galleryFor(slug).find((image) => image.caption === caption);
+  return project && photo ? [{ project, photo, focus }] : [];
+});
+
+const poster = photos[0] ? await getImage({ src: photos[0].photo.src, width: 1600 }) : undefined;
+const total = photos.length + (heroVideo ? 1 : 0);
+---
+
+<section class="hm-hero" aria-labelledby="hero-title">
+  <div class="hm-show" role="region" aria-roledescription="carousel" aria-label="Our work" data-hm-show>
+    <div class="hm-show__frame">
+      <div class="hm-hero__copy">
+        <h1 id="hero-title" class="hm-hero__title">
+          <span class="hm-hero__line">
+            {lead.map((word, i) => <span class="hm-word" style={`--i:${i}`}>{word}</span>)}
+            <span class="visually-hidden">{heroRotation.phrases.join(', ')}</span>
+            <span class="hm-word hm-turn" style={`--i:${lead.length}`} aria-hidden="true" data-hm-turn>
+              {
+                heroRotation.phrases.map((phrase, i) => (
+                  <span class="hm-turn__phrase" data-active={i === 0 ? '' : undefined}>
+                    {phrase}
+                  </span>
+                ))
+              }
+            </span>
+          </span>
+          <span class="hm-hero__line hm-hero__line--rest">
+            {rest.map((word, i) => <span class="hm-word" style={`--i:${lead.length + 1 + i}`}>{word}</span>)}
+          </span>
+        </h1>
+      </div>
+      <div class="hm-show__viewport" tabindex="0" aria-live="off" data-hm-show-viewport>
+        <ul class="hm-show__track" role="list">
+          {
+            heroVideo && (
+              <li class="hm-show__slide" aria-roledescription="slide" aria-label={`1 of ${total}`}>
+                <figure>
+                  <video muted loop playsinline preload="metadata" poster={poster?.src} data-hm-video>
+                    <source src={url(heroVideo.src)} type="video/mp4" />
+                  </video>
+                </figure>
+              </li>
+            )
+          }
+          {
+            photos.map(({ project, photo, focus }, i) => (
+              <li class="hm-show__slide" aria-roledescription="slide" aria-label={`${i + 1 + (heroVideo ? 1 : 0)} of ${total}`}>
+                <figure>
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    widths={[768, 1280, photo.src.width]}
+                    sizes="100vw"
+                    quality="high"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    style={`object-position: ${focus}`}
+                  />
+                  <figcaption>
+                    {project.name}
+                    {project.location && <span>{project.location}</span>}
+                  </figcaption>
+                </figure>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="hm-show__controls" data-hm-show-controls hidden>
+        <p class="hm-show__count" aria-hidden="true"><span data-hm-show-current>1</span><span class="hm-show__of">/ {total}</span></p>
+        <button type="button" class="hm-show__btn" data-hm-show-prev aria-label="Previous">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+        </button>
+        <button type="button" class="hm-show__btn hm-show__btn--toggle" data-hm-show-toggle>
+          <span data-hm-show-toggle-label>Pause</span>
+        </button>
+        <button type="button" class="hm-show__btn" data-hm-show-next aria-label="Next">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ply-edge" aria-hidden="true"></div>
+  </div>
+
+  <div class="shell hm-hero__foot">
+    <ul class="hm-board" role="list" aria-label={`${company.name} at a glance`}>
+      {
+        hero.proof.map((item, i) => (
+          <li class="hm-board__item" data-hm style={`--i:${i}`}>
+            <span class="hm-board__value" data-hm-count>{item.value}</span>
+            <span class="hm-board__label">{item.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <a class="text-link hm-hero__more" href={`${base}/projects/`}>{hero.secondaryCta}</a>
+  </div>
+</section>
+
+<script>
+  // The headline's sector phrase turns every few seconds, unless the visitor
+  // asks for reduced motion; it rests while the tab is hidden.
+  const turn = document.querySelector<HTMLElement>('[data-hm-turn]');
+  if (turn) {
+    const phrases = Array.from(turn.querySelectorAll<HTMLElement>('.hm-turn__phrase'));
+    let at = 0;
+
+    // The plate is sized to the phrase on show; phones let the phrase wrap instead.
+    const fit = () => {
+      if (window.matchMedia('(max-width: 40rem)').matches) {
+        turn.style.removeProperty('--w');
+        return;
+      }
+      const style = getComputedStyle(turn);
+      const pad = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      turn.style.setProperty('--w', `${Math.ceil(phrases[at]!.getBoundingClientRect().width + pad)}px`);
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    document.fonts?.ready.then(fit);
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && phrases.length > 1) {
+      window.setInterval(() => {
+        if (document.hidden) return;
+        const leaving = phrases[at]!;
+        at = (at + 1) % phrases.length;
+        delete leaving.dataset.active;
+        leaving.dataset.leaving = '';
+        window.setTimeout(() => delete leaving.dataset.leaving, 600);
+        phrases[at]!.dataset.active = '';
+        fit();
+      }, 2800);
+    }
+  }
+
+  const show = document.querySelector<HTMLElement>('[data-hm-show]');
+  const viewport = show?.querySelector<HTMLElement>('[data-hm-show-viewport]');
+  const controls = show?.querySelector<HTMLElement>('[data-hm-show-controls]');
+  const toggle = show?.querySelector<HTMLButtonElement>('[data-hm-show-toggle]');
+  const toggleLabel = show?.querySelector<HTMLElement>('[data-hm-show-toggle-label]');
+  const current = show?.querySelector<HTMLElement>('[data-hm-show-current]');
+  const video = show?.querySelector<HTMLVideoElement>('[data-hm-video]');
+
+  if (show && viewport && controls && toggle && toggleLabel && current) {
+    const slides = Array.from(viewport.querySelectorAll<HTMLElement>('.hm-show__slide'));
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const DELAY = 5000;
+    const VIDEO_DELAY = 12000;
+
+    // Autoplay only runs while the visitor wants it and is not interacting.
+    let playing = !calm.matches;
+    let held = false;
+    let onScreen = true;
+    let timer: number | undefined;
+
+    const index = () => Math.round(viewport.scrollLeft / viewport.clientWidth);
+    const videoShown = () => Boolean(video && slides[index()]?.contains(video));
+
+    const go = (i: number) => {
+      const next = (i + slides.length) % slides.length;
+      viewport.scrollTo({ left: next * viewport.clientWidth, behavior: calm.matches ? 'auto' : 'smooth' });
+    };
+
+    // The clip runs only while its slide is the one shown, and never for
+    // people who ask for reduced motion.
+    const runVideo = () => {
+      if (!video) return;
+      if (videoShown() && !calm.matches && !document.hidden) video.play().catch(() => undefined);
+      else video.pause();
+    };
+
+    const reflect = () => {
+      const i = index();
+      current.textContent = String(i + 1);
+      slides.forEach((slide, n) => slide.toggleAttribute('inert', n !== i));
+      runVideo();
+    };
+
+    const schedule = () => {
+      window.clearTimeout(timer);
+      if (playing && !held && onScreen && !document.hidden) {
+        timer = window.setTimeout(() => go(index() + 1), videoShown() ? VIDEO_DELAY : DELAY);
+      }
+    };
+
+    const setPlaying = (value: boolean) => {
+      playing = value;
+      toggleLabel.textContent = playing ? 'Pause' : 'Play';
+      toggle.setAttribute('aria-label', playing ? 'Pause slideshow' : 'Play slideshow');
+      viewport.setAttribute('aria-live', playing ? 'off' : 'polite');
+      schedule();
+    };
+
+    controls.hidden = false;
+    setPlaying(playing);
+    reflect();
+
+    let queued = false;
+    viewport.addEventListener(
+      'scroll',
+      () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          reflect();
+          schedule();
+        });
+      },
+      { passive: true },
+    );
+
+    show.querySelector('[data-hm-show-prev]')?.addEventListener('click', () => go(index() - 1));
+    show.querySelector('[data-hm-show-next]')?.addEventListener('click', () => go(index() + 1));
+    toggle.addEventListener('click', () => setPlaying(!playing));
+
+    // Hovering or focusing the frame holds it on the current slide.
+    const hold = (value: boolean) => {
+      held = value;
+      schedule();
+    };
+    show.addEventListener('pointerenter', () => hold(true));
+    show.addEventListener('pointerleave', () => hold(false));
+    show.addEventListener('focusin', () => hold(true));
+    show.addEventListener('focusout', (event) => {
+      if (!show.contains(event.relatedTarget as Node | null)) hold(false);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      schedule();
+      runVideo();
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        onScreen = entries.some((entry) => entry.isIntersecting);
+        schedule();
+      }).observe(show);
+    }
+  }
+</script>
+
+<style>
+  .hm-hero {
+    --bleed: max(var(--gutter), (100vw - 88rem) / 2);
+  }
+
+  /* The headline over the photographs, held to the shell's left edge. A navy
+     scrim behind it keeps the white type legible on any frame. */
+  .hm-hero__copy {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(1.5rem, 4vw, 4rem) var(--bleed);
+    pointer-events: none;
+  }
+
+  .hm-show__frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(to right, rgb(11 31 58 / 0.78) 0%, rgb(11 31 58 / 0.45) 55%, rgb(11 31 58 / 0.15) 100%),
+      linear-gradient(to top, rgb(11 31 58 / 0.6) 0%, rgb(11 31 58 / 0) 40%);
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------ headline */
+
+  .hm-hero__title {
+    display: grid;
+    gap: 0.18em;
+    /* Capped so the first line stays one line inside the 88rem shell. */
+    font-size: clamp(3rem, 1rem + 6.6vw, 7.9rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.86;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .hm-hero__line {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.2em;
+  }
+
+  .hm-word {
+    display: inline-block;
+  }
+
+  /* The sector phrase turns over on an orange plate: phrases share one cell,
+     the one on show rises in as the last one lifts away, and the plate
+     resizes to fit it (the script sets --w; without it the plate takes the
+     widest phrase). */
+  .hm-turn {
+    display: inline-grid;
+    width: var(--w, auto);
+    padding: 0.02em 0.12em 0;
+    overflow: hidden;
+    vertical-align: top;
+    background: var(--orange);
+    color: var(--navy);
+    /* Keeps the resize's layout and paint work inside the plate. */
+    contain: layout paint;
+    transition: width 560ms var(--ease-out);
+  }
+
+  /* Each phrase keeps its own width, so the script can measure it. */
+  .hm-turn__phrase {
+    grid-area: 1 / 1;
+    justify-self: start;
+    width: max-content;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(0.35em);
+    transition:
+      opacity 420ms var(--ease-out),
+      transform 560ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  .hm-turn__phrase[data-active] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hm-turn__phrase[data-leaving] {
+    opacity: 0;
+    transform: translateY(-0.35em);
+  }
+
+  /* On a phone the phrase wraps instead, and the plate keeps the widest width. */
+  @media (max-width: 40rem) {
+    .hm-turn {
+      width: auto;
+      max-width: 100%;
+      padding: 0.04em 0.16em 0.02em;
+    }
+
+    .hm-turn__phrase {
+      width: auto;
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hm-turn,
+    .hm-turn__phrase,
+    .hm-turn__phrase[data-leaving] {
+      transition: none;
+    }
+  }
+
+  /* The second line drops to half size and carries the promise on an orange rule. */
+  .hm-hero__line--rest {
+    font-size: 0.5em;
+    letter-spacing: 0;
+    line-height: 0.95;
+    padding-left: 0.08em;
+  }
+
+  .hm-hero__line--rest .hm-word:nth-last-child(-n + 2) {
+    background: linear-gradient(var(--orange), var(--orange)) 0 100% / 100% 0.14em no-repeat;
+    padding-bottom: 0.08em;
+  }
+
+  :global(.hm-motion) .hm-word {
+    animation: hm-rise 900ms var(--ease-out) both;
+    animation-delay: calc(var(--i) * 60ms + 120ms);
+  }
+
+  @keyframes hm-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em);
+    }
+  }
+
+  /* --------------------------------------------------------------- frame */
+
+  /* The frame runs from one edge of the screen to the other, outside any
+     shell, and fills the screen under the header; the caption, controls and
+     headline are inset by the shell's own margin so they line up with it. */
+  .hm-show__frame {
+    position: relative;
+    background: var(--navy);
+  }
+
+  :global(.hm-motion) .hm-show__frame {
+    animation: hm-wipe 900ms var(--ease-in-out) 350ms both;
+  }
+
+  @keyframes hm-wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  .hm-show__viewport {
+    display: flex;
+    height: max(30rem, calc(100svh - 7rem));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .hm-show__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hm-show__viewport:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: -6px;
+  }
+
+  .hm-show__track {
+    display: flex;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hm-show__slide {
+    position: relative;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+  }
+
+  .hm-show__slide figure {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+  }
+
+  .hm-show__slide :global(img),
+  .hm-show__slide video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hm-show__slide figcaption {
+    position: absolute;
+    bottom: 0;
+    left: var(--bleed);
+    z-index: 2;
+    display: grid;
+    gap: 0.2rem;
+    max-width: calc(100% - var(--bleed) - 1rem);
+    padding: 0.7rem 1rem 0.65rem;
+    background: var(--navy);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .hm-show__slide figcaption span {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+  }
+
+  /* Controls sit inside the frame, bottom right, on a navy strip. */
+  .hm-show__controls {
+    position: absolute;
+    right: var(--bleed);
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+    background: var(--navy);
+  }
+
+  .hm-show__controls[hidden] {
+    display: none;
+  }
+
+  .hm-show__count {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    margin: 0 0.6rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .hm-show__of {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .hm-show__btn {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0;
+    border: 2px solid #fff;
+    background: transparent;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .hm-show__btn--toggle {
+    padding: 0 0.8rem;
+  }
+
+  .hm-show__btn svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+  }
+
+  .hm-show__btn:hover {
+    border-color: var(--orange);
+    background: var(--orange);
+    color: var(--navy);
+  }
+
+  .hm-show__btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+
+  /* ---------------------------------------------------------------- foot */
+
+  .hm-hero__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    margin-top: clamp(1.25rem, 2.5vw, 2rem);
+  }
+
+  .hm-board {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hm-board__item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding-right: clamp(1.25rem, 2.5vw, 2.25rem);
+  }
+
+  .hm-board__item + .hm-board__item {
+    padding-left: clamp(1.25rem, 2.5vw, 2.25rem);
+    border-left: 1px solid var(--rule);
+  }
+
+  .hm-board__value {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 1.4rem + 2vw, 3.4rem);
+    font-weight: 900;
+    line-height: 0.85;
+    color: var(--ink);
+  }
+
+  .hm-board__item:last-child .hm-board__value {
+    color: var(--blue-text);
+  }
+
+  /* Labels stay on one line so each sits on its figure's baseline. */
+  .hm-board__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  :global(.hm-motion) .hm-board__item[data-hm] {
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 700ms var(--ease-out);
+    transition-delay: calc(var(--i) * 120ms + 600ms);
+  }
+
+  :global(.hm-motion) .hm-board__item[data-hm].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hm-hero__more {
+    margin-top: 0;
+    font-size: 1.05rem;
+  }
+
+  /* ------------------------------------------------------------- narrow */
+
+  @media (max-width: 40rem) {
+    .hm-hero__title {
+      font-size: clamp(2.4rem, 0.8rem + 9vw, 3.8rem);
+    }
+
+    .hm-hero__line--rest {
+      font-size: 0.56em;
+    }
+
+    .hm-show__viewport {
+      height: max(32rem, calc(100svh - 8.5rem));
+    }
+
+    .hm-hero__copy {
+      justify-content: flex-start;
+      padding-top: 2rem;
+    }
+
+    .hm-show__slide figcaption {
+      font-size: 1.1rem;
+      max-width: 60%;
+    }
+
+    .hm-show__controls {
+      padding: 0.35rem 0.35rem 0.35rem 0.7rem;
+    }
+
+    .hm-show__btn--toggle {
+      display: none;
+    }
+
+    .hm-board {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .hm-board__item {
+      flex-direction: column;
+      gap: 0.3rem;
+      padding-right: 0.5rem;
+    }
+
+    .hm-board__label {
+      max-width: 9ch;
+      white-space: normal;
+    }
+
+    .hm-board__item + .hm-board__item {
+      padding-left: 0.75rem;
+    }
+  }
+</style>

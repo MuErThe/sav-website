@@ -1,0 +1,285 @@
+---
+import { contact } from '../data/company';
+
+/**
+ * Contact form, styled by the site theme.
+ *
+ * The endpoint comes from PUBLIC_CONTACT_ENDPOINT so nothing is hardcoded.
+ * Without JavaScript the form posts directly to that endpoint; with it, the
+ * submission is validated inline and sent with fetch so the user keeps what
+ * they typed whatever happens.
+ */
+const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT ?? '';
+
+const enquiryTypes = [
+  'Pharmaceutical plant',
+  'Industrial shed or plant',
+  'Institutional or commercial building',
+  'Roads and site development',
+  'Shuttering and scaffolding hire',
+  'Something else',
+];
+---
+
+<form
+  class="enquiry"
+  method="post"
+  action={endpoint || undefined}
+  novalidate
+  data-endpoint={endpoint}
+  data-fallback-email={contact.email}
+  data-fallback-phone={contact.phone}
+  aria-describedby="enquiry-intro"
+>
+  <p id="enquiry-intro" class="enquiry__intro">
+    Tell us about the project and we will come back to you. Fields marked
+    <span class="enquiry__req" aria-hidden="true">*</span> are required. You can also call us on
+    <a href={contact.phoneHref}>{contact.phone}</a>.
+  </p>
+
+  <!-- Spam trap: hidden from people and assistive technology, tempting to bots. -->
+  <div class="enquiry__trap" aria-hidden="true">
+    <label for="enquiry-website">Do not fill this in</label>
+    <input type="text" id="enquiry-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="enquiry__grid">
+    <div class="field">
+      <label class="field__label" for="enquiry-name">
+        Your name <span class="enquiry__req" aria-hidden="true">*</span>
+      </label>
+      <input
+        class="field__input"
+        type="text"
+        id="enquiry-name"
+        name="name"
+        autocomplete="name"
+        required
+        aria-describedby="enquiry-name-error"
+      />
+      <p class="field__error" id="enquiry-name-error" data-error-for="name" hidden></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="enquiry-company">Company</label>
+      <input
+        class="field__input"
+        type="text"
+        id="enquiry-company"
+        name="company"
+        autocomplete="organization"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="enquiry-email">
+        Email <span class="enquiry__req" aria-hidden="true">*</span>
+      </label>
+      <input
+        class="field__input"
+        type="email"
+        id="enquiry-email"
+        name="email"
+        autocomplete="email"
+        required
+        aria-describedby="enquiry-email-error"
+      />
+      <p class="field__error" id="enquiry-email-error" data-error-for="email" hidden></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="enquiry-phone">Phone</label>
+      <input
+        class="field__input"
+        type="tel"
+        id="enquiry-phone"
+        name="phone"
+        autocomplete="tel"
+        inputmode="tel"
+      />
+    </div>
+
+    <div class="field field--wide">
+      <label class="field__label" for="enquiry-type">What do you need built?</label>
+      <select class="field__input field__select" id="enquiry-type" name="enquiryType">
+        <option value="">Select the closest match</option>
+        {enquiryTypes.map((type) => <option value={type}>{type}</option>)}
+      </select>
+    </div>
+
+    <div class="field field--wide">
+      <label class="field__label" for="enquiry-message">
+        About the project <span class="enquiry__req" aria-hidden="true">*</span>
+      </label>
+      <textarea
+        class="field__input field__textarea"
+        id="enquiry-message"
+        name="message"
+        rows="6"
+        required
+        aria-describedby="enquiry-message-hint enquiry-message-error"></textarea>
+      <p class="field__hint" id="enquiry-message-hint">
+        Location, approximate built-up area and your target timeline are the most useful details.
+      </p>
+      <p class="field__error" id="enquiry-message-error" data-error-for="message" hidden></p>
+    </div>
+  </div>
+
+  <div class="enquiry__actions">
+    <button type="submit" class="enquiry__submit">Send enquiry</button>
+  </div>
+
+  <!-- Single live region for form-level status, so it is announced once. -->
+  <div class="enquiry__status" role="status" aria-live="polite" data-form-status hidden></div>
+</form>
+
+<script>
+  interface FieldRule {
+    readonly name: string;
+    readonly label: string;
+    readonly validate: (value: string) => string | null;
+  }
+
+  const required =
+    (label: string) =>
+    (value: string): string | null =>
+      value.trim() === '' ? `${label} is required. Please add it and try again.` : null;
+
+  const RULES: FieldRule[] = [
+    { name: 'name', label: 'Your name', validate: required('Your name') },
+    {
+      name: 'email',
+      label: 'Email',
+      validate: (value) => {
+        if (value.trim() === '') return 'Email is required, so we can reply to you.';
+        // Deliberately permissive: catches typos, does not reject valid addresses.
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+          ? null
+          : 'That email address looks incomplete. Please check it includes an @ and a domain.';
+      },
+    },
+    {
+      name: 'message',
+      label: 'About the project',
+      validate: (value) =>
+        value.trim() === ''
+          ? 'Please tell us a little about the project so we can respond usefully.'
+          : null,
+    },
+  ];
+
+  document.querySelectorAll<HTMLFormElement>('form.enquiry').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const submit = form.querySelector<HTMLButtonElement>('.enquiry__submit');
+    const endpoint = form.dataset.endpoint ?? '';
+    const fallbackEmail = form.dataset.fallbackEmail ?? '';
+    const fallbackPhone = form.dataset.fallbackPhone ?? '';
+
+    const fieldFor = (name: string) => form.elements.namedItem(name) as HTMLInputElement | null;
+    const errorFor = (name: string) =>
+      form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+
+    function setStatus(message: string, kind: 'error' | 'success' | ''): void {
+      if (!status) return;
+      status.textContent = message;
+      status.hidden = message === '';
+      status.dataset.kind = kind;
+    }
+
+    function showError(name: string, message: string | null): boolean {
+      const input = fieldFor(name);
+      const error = errorFor(name);
+      if (!input) return true;
+      if (message) {
+        input.setAttribute('aria-invalid', 'true');
+        if (error) {
+          error.textContent = message;
+          error.hidden = false;
+        }
+        return false;
+      }
+      input.removeAttribute('aria-invalid');
+      if (error) {
+        error.textContent = '';
+        error.hidden = true;
+      }
+      return true;
+    }
+
+    // Validate on blur, then live once a field has already been flagged.
+    RULES.forEach((rule) => {
+      const input = fieldFor(rule.name);
+      if (!input) return;
+      input.addEventListener('blur', () => showError(rule.name, rule.validate(input.value)));
+      input.addEventListener('input', () => {
+        if (input.getAttribute('aria-invalid') === 'true') {
+          showError(rule.name, rule.validate(input.value));
+        }
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      let firstInvalid: HTMLElement | null = null;
+      for (const rule of RULES) {
+        const input = fieldFor(rule.name);
+        if (!input) continue;
+        const ok = showError(rule.name, rule.validate(input.value));
+        if (!ok && !firstInvalid) firstInvalid = input;
+      }
+
+      if (firstInvalid) {
+        setStatus(
+          'This could not be sent yet. Please check the highlighted fields above and try again.',
+          'error',
+        );
+        firstInvalid.focus();
+        return;
+      }
+
+      if (!endpoint) {
+        // Honest failure: the form is wired up but has nowhere to post yet.
+        setStatus(
+          `Your message has not been sent: this form is not connected to an inbox yet. ` +
+            `Please email ${fallbackEmail} or call ${fallbackPhone} instead.`,
+          'error',
+        );
+        return;
+      }
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+      setStatus('Sending your enquiry…', '');
+      if (submit) {
+        submit.disabled = true;
+        submit.setAttribute('aria-busy', 'true');
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+        form.reset();
+        setStatus(
+          'Thank you, your enquiry has reached us. We will reply within two working days.',
+          'success',
+        );
+      } catch {
+        // The user's input is deliberately left in place so nothing is lost.
+        setStatus(
+          `We could not send that just now. Please check your connection and try again, ` +
+            `or email ${fallbackEmail}. What you typed is still here.`,
+          'error',
+        );
+      } finally {
+        if (submit) {
+          submit.disabled = false;
+          submit.removeAttribute('aria-busy');
+        }
+      }
+    });
+  });
+</script>

@@ -1,0 +1,23 @@
+---
+/**
+ * A north-light factory roof: navy sawtooth with an orange glazing face on
+ * each tooth. Decorative, drawn as a repeating pattern so it fits any width.
+ */
+interface Props {
+  /** Unique per instance on a page, since the pattern is referenced by id. */
+  id?: string;
+  class?: string;
+}
+
+const { id = 'sawtooth', class: className } = Astro.props;
+---
+
+<svg class={className} aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id={id} width="48" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 40 36 0h12v40Z" fill="var(--navy)"></path>
+      <path d="M38 4h8v36h-8Z" fill="var(--orange)"></path>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill={`url(#${id})`}></rect>
+</svg>

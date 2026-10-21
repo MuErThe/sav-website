@@ -1,0 +1,104 @@
+---
+/**
+ * The "formerly UPCL" line that rides above the header on every page: a tag,
+ * the UPCL mark and the UPCL word, set as one quiet row. Clients know the
+ * UPCL name, so it is the first thing on the page; the SAV logo stands in
+ * the header just below, so it is not repeated here.
+ */
+import UpclMark from './UpclMark.astro';
+import { company, upcl } from '../data/company';
+---
+
+<p class="lockup">
+  <span class="lockup__was">{upcl.formerly}</span>
+  <UpclMark class="lockup__mark" />
+  <strong class="lockup__upcl">{upcl.short}</strong>
+  <span class="lockup__since">Est. {company.established} · Indore</span>
+</p>
+
+<style>
+  .lockup {
+    /* The tag, the mark and the UPCL word all stand this tall. */
+    --h: 1.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.65rem;
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+
+  .lockup__was {
+    display: inline-flex;
+    align-items: center;
+    height: var(--h);
+    padding: 0 0.6em;
+    background: var(--navy);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  /* The mark sits 4px off the UPCL word, as in the UPCL lockup itself. */
+  .lockup :global(.lockup__mark) {
+    flex: none;
+    width: var(--h);
+    height: var(--h);
+    margin-right: calc(4px - 0.5rem);
+  }
+
+  /* Big Shoulders caps stand about 0.82em tall, so this puts them level with the mark. */
+  .lockup__upcl {
+    font-family: var(--font-display);
+    font-size: calc(var(--h) / 0.82);
+    font-weight: 900;
+    line-height: var(--h);
+  }
+
+  /* A hairline pushes the place and date to the far end of the row; both
+     sit on the baseline of the UPCL word. */
+  .lockup__since {
+    display: flex;
+    flex: 1 1 10rem;
+    align-self: flex-end;
+    align-items: flex-end;
+    gap: 0.9rem;
+    padding-bottom: 0.1rem;
+    line-height: 1;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--ink-muted);
+  }
+
+  .lockup__since::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* On a phone the row stays on one line: the hairline gives way first. */
+  @media (max-width: 40rem) {
+    .lockup {
+      --h: 1.4rem;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+    }
+
+    .lockup__since {
+      flex: 1 1 0;
+      gap: 0.6rem;
+    }
+
+    .lockup__since::before {
+      min-width: 0.5rem;
+    }
+  }
+</style>

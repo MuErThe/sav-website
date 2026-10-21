@@ -1,0 +1,256 @@
+---
+import { enquiry } from '../../data/story';
+
+interface Props {
+  base: string;
+  title?: string;
+}
+
+const { base, title = enquiry.title } = Astro.props;
+
+/* Frame geometry, in drawing units: three storeys between four slabs. */
+const columns = [126, 220.5, 315];
+const storeys = [
+  { top: 222, slab: 214 },
+  { top: 170, slab: 162 },
+  { top: 118, slab: 110 },
+];
+const windowX = [145, 182, 240, 277];
+---
+
+<section class="chapter chapter--call" aria-labelledby="enquiry-title">
+  <div class="shell call">
+    <div class="call__text">
+      <h2 id="enquiry-title" class="title">{title}</h2>
+      <p class="lede">{enquiry.lede}</p>
+      <div class="call__actions">
+        <a class="btn btn--primary" href={`${base}/contact/`}>Start an enquiry</a>
+      </div>
+    </div>
+
+    <!--
+      A three-storey frame going up under a tower crane: footing, columns and
+      slabs storey by storey, then the windows. Without JavaScript, or with
+      reduced motion, the finished building shows still.
+    -->
+    <svg class="build" viewBox="0 0 480 290" aria-hidden="true" focusable="false" data-build>
+      <line class="build__ground" x1="6" y1="272" x2="474" y2="272" />
+
+      <g data-build-body>
+        <rect class="build__solid" x="114" y="266" width="222" height="6" data-b="x" data-at="0.02" data-to="0.08" />
+        {
+          storeys.map((storey, s) => {
+            const start = 0.09 + s * 0.17;
+            return (
+              <>
+                {columns.map((x, c) => (
+                  <rect
+                    class="build__solid"
+                    x={x}
+                    y={storey.top}
+                    width="9"
+                    height="44"
+                    data-b="y"
+                    data-at={(start + c * 0.012).toFixed(3)}
+                    data-to={(start + 0.07 + c * 0.012).toFixed(3)}
+                  />
+                ))}
+                <rect
+                  class="build__solid"
+                  x="114"
+                  y={storey.slab}
+                  width="222"
+                  height="8"
+                  data-b="x"
+                  data-at={(start + 0.09).toFixed(3)}
+                  data-to={(start + 0.15).toFixed(3)}
+                />
+              </>
+            );
+          })
+        }
+        {
+          storeys.map((storey, s) =>
+            windowX
+              .filter((_, w) => s > 0 || w > 1)
+              .map((x, w) => (
+                <rect
+                  class="build__window"
+                  x={x}
+                  y={storey.top + 10}
+                  width="28"
+                  height="22"
+                  data-b="fade"
+                  data-at={(0.62 + (2 - s) * 0.035 + w * 0.008).toFixed(3)}
+                  data-to={(0.65 + (2 - s) * 0.035 + w * 0.008).toFixed(3)}
+                />
+              )),
+          )
+        }
+        <rect class="build__window" x="165" y="236" width="24" height="30" data-b="fade" data-at="0.73" data-to="0.76" />
+      </g>
+
+      <!-- Tower crane: mast, jib, counter-jib and a trolley carrying a load. -->
+      <g class="build__crane">
+        <path d="M380 272V56M394 272V56" />
+        <path d="M380 272l14-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18" />
+        <path d="M100 48H458M100 56H458M100 48v8" />
+        <path d="M100 56l12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8 12-8 12 8" />
+        <path d="M387 22V48M387 22L112 48M387 22L456 48" />
+        <rect class="build__solid" x="436" y="56" width="20" height="15" />
+        <rect class="build__solid" x="394" y="56" width="14" height="12" />
+        <g data-build-trolley>
+          <rect class="build__solid" x="244" y="56" width="14" height="5" />
+          <line x1="251" y1="61" x2="251" y2="90" />
+          <rect class="build__solid" x="237" y="90" width="28" height="5" />
+        </g>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .build {
+    display: block;
+    width: 100%;
+    max-width: 34rem;
+    height: auto;
+    justify-self: end;
+    overflow: visible;
+    color: var(--navy);
+  }
+
+  .build * {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .build__ground {
+    stroke: currentColor;
+    stroke-width: 3;
+  }
+
+  .build__solid {
+    fill: currentColor;
+  }
+
+  .build__window {
+    fill: var(--card);
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .build__crane {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .build__crane .build__solid {
+    stroke: none;
+  }
+
+  /* Slabs grow from their left end, columns from their base. */
+  [data-b] {
+    transform-box: fill-box;
+  }
+
+  [data-b='x'] {
+    transform-origin: left center;
+  }
+
+  [data-b='y'] {
+    transform-origin: center bottom;
+  }
+
+  @media (max-width: 56rem) {
+    .build {
+      justify-self: start;
+      max-width: 26rem;
+    }
+  }
+</style>
+
+<script>
+  /** One cycle, in milliseconds: build, hold the finished frame, fade, repeat. */
+  const CYCLE = 14000;
+  // Matches --ease-out in base.css; Web Animations cannot read custom properties.
+  const EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  const HOLD_UNTIL = 0.9;
+  const GONE_BY = 0.97;
+
+  const hidden: Record<string, Keyframe> = {
+    x: { transform: 'scaleX(0)' },
+    y: { transform: 'scaleY(0)' },
+    fade: { opacity: 0 },
+  };
+  const shown: Record<string, Keyframe> = {
+    x: { transform: 'scaleX(1)' },
+    y: { transform: 'scaleY(1)' },
+    fade: { opacity: 1 },
+  };
+
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<SVGSVGElement>('[data-build]').forEach((svg) => {
+    if (calm.matches || !('IntersectionObserver' in window)) return;
+
+    const animations: Animation[] = [];
+
+    svg.querySelectorAll<SVGElement>('[data-b]').forEach((part) => {
+      const kind = part.dataset.b ?? 'fade';
+      const at = Number(part.dataset.at);
+      const to = Number(part.dataset.to);
+      animations.push(
+        part.animate(
+          [
+            { ...hidden[kind], offset: 0 },
+            { ...hidden[kind], offset: at, easing: EASE },
+            { ...shown[kind], offset: to },
+            { ...shown[kind], offset: 1 },
+          ],
+          { duration: CYCLE, iterations: Infinity },
+        ),
+      );
+    });
+
+    const body = svg.querySelector<SVGElement>('[data-build-body]');
+    if (body) {
+      animations.push(
+        body.animate(
+          [
+            { opacity: 1, offset: 0 },
+            { opacity: 1, offset: HOLD_UNTIL, easing: 'ease-in-out' },
+            { opacity: 0, offset: GONE_BY },
+            { opacity: 0, offset: 1 },
+          ],
+          { duration: CYCLE, iterations: Infinity },
+        ),
+      );
+    }
+
+    // The trolley runs out over the frame and back while the storeys go up.
+    const trolley = svg.querySelector<SVGElement>('[data-build-trolley]');
+    if (trolley) {
+      animations.push(
+        trolley.animate(
+          [{ transform: 'translateX(20px)' }, { transform: 'translateX(-110px)' }],
+          { duration: CYCLE / 4, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' },
+        ),
+      );
+    }
+
+    animations.forEach((animation) => animation.pause());
+
+    // Only runs while the drawing is on screen.
+    new IntersectionObserver((entries) => {
+      const visible = entries.some((entry) => entry.isIntersecting);
+      animations.forEach((animation) => (visible ? animation.play() : animation.pause()));
+    }).observe(svg);
+
+    calm.addEventListener('change', () => {
+      if (!calm.matches) return;
+      animations.forEach((animation) => animation.cancel());
+    });
+  });
+</script>

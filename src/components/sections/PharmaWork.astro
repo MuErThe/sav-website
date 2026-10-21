@@ -1,0 +1,313 @@
+---
+/**
+ * The pharmaceutical plants as a numbered index rather than cards. Pointing at
+ * or focusing a plant brings its photograph into the frame beside the list;
+ * on narrow screens each plant carries its own photograph instead.
+ */
+import { Image } from 'astro:assets';
+import { pharma, pharmaProjects } from '../../data/story';
+import { coverFor } from '../../lib/gallery';
+
+interface Props {
+  base: string;
+  number?: string;
+}
+
+const { base, number = '01' } = Astro.props;
+const plants = pharmaProjects.map((project) => ({ project, cover: coverFor(project.slug) }));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="chapter hm-work" aria-labelledby="pharma-title" data-hm-work>
+  <div class="shell">
+    <header class="chapter__head">
+      <p class="section-no" aria-hidden="true">{number}</p>
+      <h2 id="pharma-title" class="section-title">{pharma.title}</h2>
+      <p class="lede">{pharma.lede}</p>
+    </header>
+
+    <div class="hm-work__grid">
+      <ol class="hm-work__list" role="list">
+        {
+          plants.map(({ project, cover }, i) => (
+            <li class="hm-work__row" data-hm style={`--i:${i}`}>
+              <a class="hm-work__link" href={`${base}/projects/${project.slug}/`} data-hm-plant={i}>
+                <span class="hm-work__no" aria-hidden="true">{pad(i + 1)}</span>
+                <span class="hm-work__name">{project.name}</span>
+                <span class="hm-work__meta">
+                  {[project.location, project.area].filter(Boolean).join(' · ')}
+                </span>
+              </a>
+              {cover && (
+                <div class="hm-work__inline">
+                  <Image src={cover.src} alt={cover.alt} widths={[480, 800]} sizes="calc(100vw - 2.5rem)" loading="lazy" />
+                </div>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="hm-work__frame" aria-hidden="true">
+        {
+          plants.map(({ cover }, i) =>
+            cover ? (
+              <div class="hm-work__shot" data-hm-shot={i} data-active={i === 0 ? '' : undefined}>
+                <Image src={cover.src} alt="" widths={[640, 1040]} sizes="40vw" loading="lazy" />
+              </div>
+            ) : null,
+          )
+        }
+      </div>
+
+      <div class="hm-work__more">
+        <a class="btn btn--ghost" href={`${base}/projects/`}>All projects</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hm-work__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .hm-work__list {
+    padding: 0;
+    margin: 0;
+    border-top: 3px solid var(--navy);
+  }
+
+  .hm-work__row {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hm-work__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.25rem 1rem;
+    padding: clamp(1rem, 2vw, 1.4rem) 0.75rem;
+    color: var(--ink);
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  /* Orange sweep from the left on hover or focus. */
+  .hm-work__link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 380ms var(--ease-out);
+  }
+
+  .hm-work__link:hover::before,
+  .hm-work__link:focus-visible::before,
+  .hm-work__link[data-current]::before {
+    transform: scaleX(1);
+  }
+
+  .hm-work__link:focus-visible {
+    outline: 3px solid var(--sav-blue);
+    outline-offset: 2px;
+  }
+
+  .hm-work__no {
+    grid-row: span 2;
+    padding-top: 0.2em;
+    font-size: 1.1rem;
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--blue-text);
+  }
+
+  /* Everything on the orange sweep reads in navy, the name included. */
+  .hm-work__link:hover .hm-work__no,
+  .hm-work__link:hover .hm-work__name,
+  .hm-work__link:hover .hm-work__meta,
+  .hm-work__link:focus-visible .hm-work__no,
+  .hm-work__link:focus-visible .hm-work__name,
+  .hm-work__link:focus-visible .hm-work__meta,
+  .hm-work__link[data-current] .hm-work__no,
+  .hm-work__link[data-current] .hm-work__name,
+  .hm-work__link[data-current] .hm-work__meta {
+    color: var(--navy);
+  }
+
+  .hm-work__name {
+    font-size: clamp(1.6rem, 1rem + 2.2vw, 2.8rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .hm-work__meta {
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+  }
+
+  /* The frame stays in view while the list scrolls past it. */
+  .hm-work__frame {
+    position: sticky;
+    top: 6rem;
+    aspect-ratio: 4 / 5;
+    border: 3px solid var(--orange);
+    background: var(--band);
+    overflow: hidden;
+    container-type: inline-size;
+  }
+
+  .hm-work__shot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.06);
+    transition:
+      opacity 450ms var(--ease-out),
+      transform 900ms var(--ease-out);
+  }
+
+  .hm-work__shot[data-active] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The photo is wider than the frame, so it follows the pointer: moving
+     across the frame pans it from one edge to the other (the script sets
+     --px from 0 to 1; at rest it sits centred). It moves by translate, so
+     the pan stays on the compositor instead of repainting the photo. */
+  .hm-work__shot :global(img) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+    min-width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
+    translate: calc((100cqw - 100%) * var(--px, 0.5)) 0;
+    transition: translate 600ms var(--ease-out);
+  }
+
+  .hm-work__inline {
+    display: none;
+  }
+
+  :global(.hm-motion) .hm-work__row[data-hm] {
+    opacity: 0;
+    transform: translateX(-1rem);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 700ms var(--ease-out);
+    transition-delay: calc(var(--i) * 70ms);
+  }
+
+  :global(.hm-motion) .hm-work__row[data-hm].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The list and its button share the left column; the frame holds the right. */
+  .hm-work__list {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .hm-work__more {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 1.5rem;
+  }
+
+  .hm-work__frame {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  /* Phones: no room beside the list, so each plant carries its own photo. */
+  @media (max-width: 44rem) {
+    .hm-work__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hm-work__frame {
+      display: none;
+    }
+
+    .hm-work__inline {
+      position: relative;
+      display: block;
+      margin: 0 0 1.25rem 4rem;
+    }
+
+    .hm-work__inline :global(img) {
+      width: 100%;
+      height: auto;
+      max-height: 14rem;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hm-work__link::before,
+    .hm-work__shot,
+    .hm-work__shot :global(img) {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-hm-work]').forEach((root) => {
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('[data-hm-plant]'));
+    const shots = Array.from(root.querySelectorAll<HTMLElement>('[data-hm-shot]'));
+
+    const show = (i: number) => {
+      shots.forEach((shot) => {
+        if (shot.dataset.hmShot === String(i)) shot.dataset.active = '';
+        else delete shot.dataset.active;
+      });
+      links.forEach((link, n) => {
+        if (n === i) link.dataset.current = '';
+        else delete link.dataset.current;
+      });
+    };
+
+    links.forEach((link, i) => {
+      link.addEventListener('pointerenter', () => show(i));
+      link.addEventListener('focus', () => show(i));
+    });
+
+    // Pointing across the frame pans the photo, so its whole width can be seen.
+    const frame = root.querySelector<HTMLElement>('.hm-work__frame');
+    if (frame) {
+      // Read at most once a frame, however fast the pointer reports.
+      let pointer: PointerEvent | null = null;
+      frame.addEventListener('pointermove', (event) => {
+        if (!pointer) {
+          requestAnimationFrame(() => {
+            if (!pointer) return;
+            const box = frame.getBoundingClientRect();
+            const x = Math.min(1, Math.max(0, (pointer.clientX - box.left) / box.width));
+            frame.style.setProperty('--px', x.toFixed(3));
+            pointer = null;
+          });
+        }
+        pointer = event;
+      });
+      frame.addEventListener('pointerleave', () => {
+        pointer = null;
+        frame.style.removeProperty('--px');
+      });
+    }
+  });
+</script>

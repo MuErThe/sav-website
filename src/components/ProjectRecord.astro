@@ -1,0 +1,57 @@
+---
+import ProjectCarousel from './sections/ProjectCarousel.astro';
+import { projects, type Project } from '../data/projects';
+import { galleryFor } from '../lib/gallery';
+
+interface Props {
+  project: Project;
+  /** Site root, so links respect the base path. */
+  base: string;
+  /** Heading level, so records sit correctly under the surrounding section. */
+  level?: 2 | 3;
+}
+
+const { project, base, level = 3 } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+const images = galleryFor(project.slug);
+const href = `${base}/projects/${project.slug}/`;
+const number = String(projects.indexOf(project) + 1).padStart(2, '0');
+
+const facts = [
+  project.location ? { label: 'Location', value: project.location } : null,
+  project.area ? { label: 'Area', value: project.area } : null,
+  { label: 'Scope', value: project.scope },
+].filter((fact): fact is { label: string; value: string } => fact !== null);
+---
+
+<li class="record" data-sector={project.sector}>
+  <div class="record__media">
+    {
+      images.length > 0 ? (
+        <ProjectCarousel images={images} label={`${project.name} photographs`} href={href} />
+      ) : (
+        <p class="record__placeholder">Site photography for this project is on its way</p>
+      )
+    }
+  </div>
+
+  <div class="record__body">
+    <p class="record__meta">
+      <span class="record__no">No. {number}</span>
+      <span class="record__sector">{project.sector}</span>
+    </p>
+    <Heading class="record__title">
+      <a class="record__link" href={href}>{project.name}</a>
+    </Heading>
+    <dl class="record__facts">
+      {
+        facts.map((fact) => (
+          <div>
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</li>

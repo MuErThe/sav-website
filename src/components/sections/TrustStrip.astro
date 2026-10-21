@@ -1,0 +1,146 @@
+---
+/**
+ * Client logos under the hero, drifting in one slow row that pauses on hover.
+ * The first set is the real list; the copy that closes the loop is hidden
+ * from assistive tech and only shown while the row moves.
+ */
+import { Image } from 'astro:assets';
+import { trust } from '../../data/story';
+import { clients } from '../../data/clients';
+import { clientLogo } from '../../lib/gallery';
+
+const logos = trust.clientFiles
+  .map((file) => ({ client: clients.find((c) => c.file === file), logo: clientLogo(file) }))
+  .filter((entry) => entry.client && entry.logo);
+---
+
+<section class="hm-trust" aria-labelledby="trust-title">
+  <div class="shell hm-trust__head">
+    <h2 id="trust-title" class="hm-trust__title">{trust.title}</h2>
+  </div>
+
+  <div class="hm-trust__rail">
+    <div class="hm-trust__track">
+      <ul class="hm-trust__set" role="list">
+        {
+          logos.map(({ client, logo }) => (
+            <li class="hm-trust__logo">
+              <Image src={logo!} alt={client!.name} densities={[1, 2]} loading="lazy" />
+            </li>
+          ))
+        }
+      </ul>
+      <ul class="hm-trust__set hm-trust__set--copy" role="list" aria-hidden="true">
+        {
+          logos.map(({ logo }) => (
+            <li class="hm-trust__logo">
+              <Image src={logo!} alt="" densities={[1, 2]} loading="lazy" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hm-trust {
+    padding-block: clamp(4.5rem, 9vw, 7.5rem) clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .hm-trust__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .hm-trust__title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-text);
+  }
+
+  /* The rail fades out at both ends so logos drift in rather than cut off. */
+  .hm-trust__rail {
+    overflow: hidden;
+    border-block: 2px solid var(--navy);
+    background: var(--card);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .hm-trust__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .hm-trust__set {
+    display: flex;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hm-trust__logo {
+    display: grid;
+    place-items: center;
+    width: clamp(8.5rem, 12vw, 11rem);
+    height: 5.5rem;
+    padding: 1rem 1.25rem;
+    border-right: 1px solid var(--hairline);
+  }
+
+  .hm-trust__logo :global(img) {
+    max-width: 100%;
+    max-height: 3.5rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .hm-trust__set--copy {
+    display: none;
+  }
+
+  :global(.hm-motion) .hm-trust__set--copy {
+    display: flex;
+  }
+
+  :global(.hm-motion) .hm-trust__track {
+    animation: hm-drift 48s linear infinite;
+  }
+
+  .hm-trust__rail:hover .hm-trust__track {
+    animation-play-state: paused;
+  }
+
+  /* Without motion the logos sit in an even grid inside the page instead. */
+  :global(html:not(.hm-motion)) .hm-trust__track {
+    width: auto;
+  }
+
+  :global(html:not(.hm-motion)) .hm-trust__set {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    width: 100%;
+  }
+
+  :global(html:not(.hm-motion)) .hm-trust__set--copy {
+    display: none;
+  }
+
+  :global(html:not(.hm-motion)) .hm-trust__logo {
+    width: auto;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  @keyframes hm-drift {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

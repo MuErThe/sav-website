@@ -1,0 +1,104 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../theme/Layout.astro';
+import OrgFlow from '../components/sections/OrgFlow.astro';
+import ChapterHead from '../components/ChapterHead.astro';
+import { leadership, projectManagers, teamIntro, organogram } from '../data/people';
+import { portraitFor } from '../lib/gallery';
+---
+
+<Layout
+  title="People"
+  description="The leadership, project managers and team structure behind SAV Construction, with over 70 staff including engineers, project managers and purchasing managers."
+>
+  <section class="chapter" aria-labelledby="leadership-title">
+    <div class="shell">
+      <ChapterHead number="01" title="Leadership" id="leadership-title" lede={teamIntro} level={1} />
+
+      <ul class="people" role="list">
+        {
+          leadership.map((person) => {
+            const portrait = portraitFor(person.slug);
+            return (
+              <li class="person">
+                {portrait && (
+                  <Image
+                    src={portrait}
+                    alt={`Portrait of ${person.name}, ${person.role} at SAV Construction.`}
+                    widths={[320, 560]}
+                    sizes="(max-width: 700px) 100vw, 33vw"
+                    loading="lazy"
+                    class="person__portrait"
+                  />
+                )}
+                <div class="person__body">
+                  <h2 class="person__name">{person.name}</h2>
+                  <p class="person__role">{person.role}</p>
+                  <p class="person__exp">{person.experience} experience</p>
+                  <p class="person__bio">{person.bio}</p>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter chapter--raised" aria-labelledby="pm-title">
+    <div class="shell">
+      <ChapterHead number="02" title="Project managers" id="pm-title" />
+
+      <ul class="people" role="list">
+        {
+          projectManagers.map((person) => {
+            const portrait = portraitFor(person.slug);
+            return (
+              <li class="person">
+                {portrait && (
+                  <div class="person__frame">
+                    <Image
+                      src={portrait}
+                      alt={`Portrait of ${person.name}, ${person.role} at SAV Construction.`}
+                      widths={[320, 560]}
+                      sizes="(max-width: 700px) 100vw, 33vw"
+                      loading="lazy"
+                      class="person__portrait person__portrait--deck"
+                    />
+                  </div>
+                )}
+                <div class="person__body">
+                  <h3 class="person__name">{person.name}</h3>
+                  <p class="person__role">{person.role}</p>
+                  <p class="person__exp">{person.experience} experience</p>
+                  <ul class="pills pills--sm" role="list">
+                    {person.skills.map((skill) => (
+                      <li class="pill">
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="structure-title">
+    <div class="shell">
+      <ChapterHead
+        number="03"
+        title="How we are structured"
+        id="structure-title"
+        lede="Every site runs through a project manager, supported by centralised warehousing, quality and safety, and billing."
+      />
+
+      <div class="org-wrap" tabindex="0" role="region" aria-label="Organisation chart, scrollable" data-pan>
+        <OrgFlow node={organogram} />
+      </div>
+    </div>
+  </section>
+</Layout>

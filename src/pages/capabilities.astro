@@ -1,0 +1,1184 @@
+---
+import { Image } from 'astro:assets';
+import { root } from '../lib/paths';
+import Layout from '../theme/Layout.astro';
+import { services, safety, quality, warehouse, workshop } from '../data/company';
+import { ledger, serviceLines } from '../data/story';
+import { clients } from '../data/clients';
+import { capabilityGallery, clientLogo, galleryFor } from '../lib/gallery';
+import YardIcon from '../components/YardIcon.astro';
+import SawtoothRoof from '../components/SawtoothRoof.astro';
+
+const base = `${root}`;
+const yardPhotos = capabilityGallery('warehouse');
+const labPhotos = capabilityGallery('quality');
+
+const chapters = [
+  { id: 'yard', title: 'The yard' },
+  { id: 'safety', title: 'Safety' },
+  { id: 'quality', title: 'Quality' },
+  { id: 'services', title: 'What we build' },
+  { id: 'clients', title: 'Our clientele' },
+];
+
+const two = (n: number) => String(n).padStart(2, '0');
+
+const sitePhotos = capabilityGallery('services');
+
+/**
+ * A photograph for each line of work: a named pick where one fits best, else
+ * a photo from a project that shows the line, preferring one whose caption
+ * names the subject, else the closest general site photo, and the laboratory
+ * for the laboratories line.
+ */
+const boardPicks: Record<string, { slug: string; caption?: RegExp }> = {
+  'Effluent & waste treatment plants': { slug: 'alembic-pharmaceuticals', caption: /utilities/i },
+  'Power plants': { slug: 'caparo' },
+};
+
+const boardPhotos = serviceLines.map((line) => {
+  const title = line.title;
+  const pick = boardPicks[title];
+  if (pick) {
+    const own = galleryFor(pick.slug).filter((photo) => !photo.placeholder);
+    const hit = pick.caption ? own.find((photo) => pick.caption!.test(photo.caption)) : own[0];
+    if (hit) return hit;
+  }
+  const subject = /silo|storage/i.test(title) ? /silo/i : /road|pavement/i.test(title) ? /road/i : null;
+  for (const project of line.projects) {
+    const own = galleryFor(project.slug).filter((photo) => !photo.placeholder);
+    const hit = subject ? own.find((photo) => subject.test(photo.caption)) : own[0];
+    if (hit) return hit;
+  }
+  if (/laborator/i.test(title)) return labPhotos[0];
+  const kind = /road|pavement/i.test(title)
+    ? /road/i
+    : /silo|storage|effluent|waste|water|tank/i.test(title)
+      ? /tank/i
+      : /high rise|residential|institutional/i.test(title)
+        ? /institutional/i
+        : /shed/i;
+  return sitePhotos.find((photo) => kind.test(photo.caption)) ?? sitePhotos[0];
+});
+
+
+/** Logos split into two rows that drift in opposite directions. */
+const withLogo = clients
+  .map((client) => ({ client, logo: clientLogo(client.file) }))
+  .filter((entry): entry is { client: (typeof clients)[number]; logo: NonNullable<ReturnType<typeof clientLogo>> } =>
+    Boolean(entry.logo),
+  );
+const half = Math.ceil(withLogo.length / 2);
+const logoRows = [withLogo.slice(0, half), withLogo.slice(half)];
+
+/** Every project's own photographs, never the representative stand-ins. */
+/** Fits once round the ring: "ISO 9001:2015 · Quality management system · ". */
+const stampText = 'ISO 9001:2015 · Quality management system · ';
+---
+
+<Layout
+  title="Capabilities"
+  description="The in-house shuttering and scaffolding yard and formwork workshop behind SAV Construction, our safety policy, ISO 9001:2015 quality management, and the work we take on."
+>
+  <!-- Opening: title and a typographic contents list. -->
+  <section class="cp-open" aria-labelledby="cp-title">
+    <div class="shell cp-open__grid">
+      <h1 id="cp-title" class="cp-open__title">
+        <span class="cp-open__line">What we hold,</span>
+        <span class="cp-open__line cp-open__line--2">how we build<span class="cp-open__stop">.</span></span>
+      </h1>
+      <nav class="cp-index" aria-label="On this page">
+        <ol role="list">
+          {
+            chapters.map((chapter, i) => (
+              <li>
+                <a class="cp-index__link" href={`#${chapter.id}`}>
+                  <span class="cp-index__no" aria-hidden="true">{two(i + 1)}</span>
+                  <span class="cp-index__name">{chapter.title}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 01 · The yard, as a stock register. -->
+  <section class="cp-yard" id="yard" aria-labelledby="yard-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">01</p>
+      <h2 id="yard-title" class="section-title">{ledger.title}</h2>
+      <p class="cp-lede">{ledger.lede}</p>
+
+      <ol class="cp-stock" role="list">
+        {
+          ledger.rows.map((row) => (
+            <li class="cp-stock__row" data-cp>
+              <YardIcon name={row.icon} class="cp-stock__icon" />
+              <p class="cp-stock__qty">{row.value}</p>
+              <p class="cp-stock__item">{row.label}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="cp-note">{warehouse.note}.</p>
+
+      <div class="cp-shop">
+        <h3 class="cp-shop__title">{workshop.title}</h3>
+        <p>{workshop.body}</p>
+      </div>
+
+      <div class="cp-strip cp-strip--two" data-cp>
+        {
+          yardPhotos.map((photo, i) => (
+            <figure class={`cp-strip__item cp-strip__item--${i + 1}`}>
+              <Image src={photo.src} alt={photo.alt} widths={[photo.src.width]} sizes="(max-width: 52rem) 100vw, 50vw" loading="lazy" />
+              <figcaption>Fig. {two(i + 1)} · {photo.caption}</figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · Safety: the zero stays pinned while the policy scrolls past. -->
+  <section class="cp-safety" id="safety" aria-labelledby="safety-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">02</p>
+      <h2 id="safety-title" class="section-title">Safety</h2>
+
+      <div class="cp-safety__grid">
+        <div class="cp-safety__pin">
+          <p class="cp-zero" aria-hidden="true">{safety.headlineValue}</p>
+          <p class="cp-zero__label">
+            <span class="visually-hidden">{safety.headlineValue} </span>{safety.headlineLabel}
+          </p>
+          <p class="cp-small">{safety.compliance}</p>
+          <p class="cp-small">{safety.standards}</p>
+        </div>
+
+        <div>
+          <h3 class="cp-sub">Safety policy</h3>
+          <ol class="cp-policy" role="list">
+            {
+              safety.policy.map((item, i) => (
+                <li class="cp-policy__item" data-cp>
+                  <span class="cp-policy__no" aria-hidden="true">{two(i + 1)}</span>
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · Quality: the certification as a turning stamp, tests as a run of type. -->
+  <section class="cp-quality" id="quality" aria-labelledby="quality-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">03</p>
+      <div class="cp-quality__head">
+        <div>
+          <h2 id="quality-title" class="section-title">Quality policy</h2>
+          <p class="cp-lede">{quality.policy}</p>
+        </div>
+        <svg class="cp-stamp" viewBox="0 0 200 200" role="img" aria-label={quality.certification} focusable="false">
+          <defs>
+            <path id="cp-stamp-ring" d="M100 100m-78 0a78 78 0 1 1 156 0a78 78 0 1 1-156 0"></path>
+          </defs>
+          <circle class="cp-stamp__outer" cx="100" cy="100" r="96"></circle>
+          <circle class="cp-stamp__inner" cx="100" cy="100" r="60"></circle>
+          <g class="cp-stamp__spin">
+            <text class="cp-stamp__ring"><textPath href="#cp-stamp-ring" textLength="488" lengthAdjust="spacing">{stampText}</textPath></text>
+          </g>
+          <text class="cp-stamp__iso" x="100" y="96" text-anchor="middle">ISO</text>
+          <text class="cp-stamp__num" x="100" y="120" text-anchor="middle">9001:2015</text>
+        </svg>
+      </div>
+
+      <div class="cp-lab">
+        <div class="cp-lab__tests">
+          <h3 class="cp-sub">Quality control tests on site</h3>
+          <ol class="cp-tests" role="list">
+            {
+              quality.tests.map((test, i) => (
+                <li class="cp-tests__row" data-cp>
+                  <span class="cp-tests__no" aria-hidden="true">{two(i + 1)}</span>
+                  <span class="cp-tests__name">{test}</span>
+                </li>
+              ))
+            }
+          </ol>
+          <p class="cp-small">{quality.testsNote}</p>
+        </div>
+
+        <figure class="cp-lab__shed" data-cp>
+          <SawtoothRoof id="cp-lab-roof" class="cp-lab__roof" />
+          <ul class="cp-lab__wall" role="list">
+            {
+              labPhotos.map((photo) => (
+                <li class="cp-lab__panel">
+                  <Image src={photo.src} alt={photo.alt} widths={[photo.src.width]} sizes="(max-width: 52rem) 50vw, 22vw" loading="lazy" />
+                  <span class="cp-lab__label" aria-hidden="true">{photo.caption}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <div class="ply-edge" aria-hidden="true"></div>
+          <figcaption class="cp-lab__caption">The site laboratory</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · Services, as one large typographic list. -->
+  <section class="cp-services" id="services" aria-labelledby="services-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">04</p>
+      <h2 id="services-title" class="section-title">What we build</h2>
+      <p class="cp-lede">{services.intro}</p>
+      <ol class="cp-board" role="list">
+        {
+          services.items.map((item, i) => {
+            const photo = boardPhotos[i];
+            return (
+              <li class="cp-board__cell" data-cp>
+                {photo && (
+                  <Image
+                    src={photo.src}
+                    alt=""
+                    class="cp-board__photo"
+                    widths={[480, Math.min(800, photo.src.width)]}
+                    sizes="(max-width: 36rem) 100vw, (max-width: 56rem) 50vw, 30vw"
+                    loading="lazy"
+                  />
+                )}
+                <span class="cp-board__no" aria-hidden="true">{two(i + 1)}</span>
+                <span class="cp-board__name">{item}</span>
+              </li>
+            );
+          })
+        }
+        <li class="cp-board__cell cp-board__cell--ask">
+          <span class="cp-board__name">Something else in mind?</span>
+          <a class="text-link" href={`${base}/contact/`}>Start an enquiry</a>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 05 · Clients: two rows drifting in opposite directions. -->
+  <section class="cp-clients" id="clients" aria-labelledby="clients-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">05</p>
+      <h2 id="clients-title" class="section-title">Our clientele</h2>
+      <p class="cp-lede">
+        Organisations across pharmaceuticals, manufacturing, infrastructure and education that have trusted us
+        with their sites.
+      </p>
+    </div>
+    <div class="cp-logos">
+      {
+        logoRows.map((row, r) => (
+          <div class={`cp-logos__row cp-logos__row--${r + 1}`}>
+            <ul class="cp-logos__set" role="list">
+              {row.map(({ client, logo }) => (
+                <li class="cp-logos__cell">
+                  <Image src={logo} alt={client.name} densities={[1, 2]} loading="lazy" />
+                </li>
+              ))}
+            </ul>
+            <ul class="cp-logos__set cp-logos__set--copy" role="list" aria-hidden="true">
+              {row.map(({ logo }) => (
+                <li class="cp-logos__cell">
+                  <Image src={logo} alt="" densities={[1, 2]} loading="lazy" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!calm.matches && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('cp-motion');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.15 },
+    );
+    document.querySelectorAll('[data-cp]').forEach((el) => observer.observe(el));
+  }
+</script>
+
+<style>
+  .shell :global(img) {
+    display: block;
+  }
+
+  /* ------------------------------------------------------------- shared */
+
+  .cp-lede {
+    max-width: 60ch;
+    margin-top: 1.25rem;
+    font-size: clamp(1.02rem, 0.95rem + 0.35vw, 1.2rem);
+    color: var(--ink-muted);
+  }
+
+  .cp-sub {
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-text);
+  }
+
+  .cp-small {
+    max-width: 50ch;
+    margin-top: 1rem;
+    font-size: 0.92rem;
+    color: var(--ink-muted);
+  }
+
+  .cp-note {
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* ------------------------------------------------------------ opening */
+
+  .cp-open {
+    padding-block: clamp(3rem, 7vw, 6rem);
+    border-bottom: 3px solid var(--navy);
+  }
+
+  .cp-open__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: end;
+  }
+
+  .cp-open__line {
+    display: block;
+    font-size: clamp(3rem, 1rem + 7vw, 8.5rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .cp-open__line--2 {
+    padding-left: 12%;
+    color: var(--blue-text);
+  }
+
+  .cp-open__stop {
+    color: var(--orange);
+  }
+
+  .cp-index ol {
+    border-top: 3px solid var(--navy);
+  }
+
+  .cp-index__link {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: baseline;
+    padding: 0.85rem 0.25rem;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    color: var(--ink);
+    isolation: isolate;
+  }
+
+  .cp-index__link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 380ms var(--ease-in-out);
+  }
+
+  .cp-index__link:hover::before,
+  .cp-index__link:focus-visible::before {
+    transform: none;
+  }
+
+  .cp-index__no {
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--blue-text);
+  }
+
+  .cp-index__link:hover .cp-index__no,
+  .cp-index__link:focus-visible .cp-index__no {
+    color: var(--ink);
+  }
+
+  .cp-index__name {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 52rem) {
+    .cp-open__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* On phones the indent would push the second line onto two. */
+  @media (max-width: 36rem) {
+    .cp-open__line {
+      font-size: clamp(2.4rem, 0.8rem + 8vw, 3rem);
+    }
+
+    .cp-open__line--2 {
+      padding-left: 1.5rem;
+    }
+  }
+
+  :global(.cp-motion) .cp-open__line {
+    animation: cp-wipe 900ms var(--ease-in-out) both;
+  }
+
+  :global(.cp-motion) .cp-open__line--2 {
+    animation-delay: 160ms;
+  }
+
+  :global(.cp-motion) .cp-index li {
+    animation: cp-rise 600ms var(--ease-out) both;
+  }
+
+  :global(.cp-motion) .cp-index li:nth-child(2) {
+    animation-delay: 380ms;
+  }
+
+  :global(.cp-motion) .cp-index li:nth-child(3) {
+    animation-delay: 460ms;
+  }
+
+  :global(.cp-motion) .cp-index li:nth-child(4) {
+    animation-delay: 540ms;
+  }
+
+  :global(.cp-motion) .cp-index li:nth-child(5) {
+    animation-delay: 620ms;
+  }
+
+  :global(.cp-motion) .cp-index li:first-child {
+    animation-delay: 300ms;
+  }
+
+  @keyframes cp-wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes cp-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
+
+  /* --------------------------------------------------------------- yard */
+
+  .cp-yard {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  /* The stock reads as one strip: four figures across, labels tucked under. */
+  .cp-stock {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    border-top: 3px solid var(--navy);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cp-stock__row {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: clamp(1rem, 1.8vw, 1.4rem) clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .cp-stock__row:first-child {
+    padding-left: 0;
+  }
+
+  .cp-stock__row + .cp-stock__row {
+    border-left: 1px solid var(--rule);
+  }
+
+  .cp-stock__row :global(.cp-stock__icon) {
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 0.75rem;
+    fill: none;
+    stroke: var(--blue-text);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .cp-stock__qty {
+    font-size: clamp(2.2rem, 1.2rem + 2.4vw, 3.6rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--blue-text);
+  }
+
+  .cp-stock__item {
+    /* Wide enough for every label to sit on two lines. */
+    max-width: 30ch;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 52rem) {
+    .cp-stock {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cp-stock__row:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .cp-stock__row:nth-child(n + 3) {
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  /* A staggered filmstrip: photos at their own sizes, stepped down the page. */
+  .cp-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+    align-items: start;
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .cp-strip--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Two photographs side by side at full width, level and the same height. */
+  .cp-strip--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  .cp-strip--two .cp-strip__item--2 {
+    margin-top: 0;
+  }
+
+  .cp-strip--two .cp-strip__item img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .cp-strip__item {
+    margin: 0;
+  }
+
+  .cp-strip__item--2 {
+    margin-top: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .cp-strip__item--3 {
+    margin-top: clamp(1rem, 2.5vw, 2.25rem);
+  }
+
+  .cp-strip__item--4 {
+    margin-top: clamp(3rem, 7vw, 6rem);
+  }
+
+  .cp-strip__item img {
+    width: 100%;
+    height: auto;
+    box-shadow: 0.5rem 0.5rem 0 var(--orange);
+  }
+
+  .cp-strip__item figcaption {
+    margin-top: 1.1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 52rem) {
+    .cp-strip,
+    .cp-strip--four {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cp-strip__item--2,
+    .cp-strip__item--3,
+    .cp-strip__item--4 {
+      margin-top: 0;
+    }
+  }
+
+  /* ------------------------------------------------------------- safety */
+
+  .cp-safety {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: var(--band);
+  }
+
+  .cp-safety__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  /* Stays in view while the policy list passes; released at the end of the grid. */
+  .cp-safety__pin {
+    position: sticky;
+    top: 7rem;
+  }
+
+  .cp-zero {
+    font-size: clamp(9rem, 5rem + 14vw, 18rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.78;
+    color: var(--navy);
+    text-shadow: 0.06em 0.05em 0 var(--blue);
+  }
+
+  .cp-zero__label {
+    max-width: 22ch;
+    margin-top: 1.5rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .cp-policy {
+    border-top: 3px solid var(--navy);
+  }
+
+  .cp-policy__item {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cp-policy__no {
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--blue-text);
+  }
+
+  @media (max-width: 52rem) {
+    .cp-safety__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cp-safety__pin {
+      position: static;
+    }
+  }
+
+  /* ------------------------------------------------------------ quality */
+
+  .cp-quality {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .cp-quality__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(11rem, 18vw, 16rem);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+    margin-bottom: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .cp-stamp {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .cp-stamp__outer {
+    fill: var(--blue);
+    stroke: var(--navy);
+    stroke-width: 3;
+  }
+
+  .cp-stamp__inner {
+    fill: var(--card);
+    stroke: var(--navy);
+    stroke-width: 2;
+  }
+
+  .cp-stamp__ring {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+    fill: var(--on-blue);
+  }
+
+  .cp-stamp__iso {
+    font-size: 30px;
+    font-family: var(--font-display);
+    font-weight: 900;
+    fill: var(--ink);
+  }
+
+  .cp-stamp__num {
+    font-size: 15px;
+    font-weight: 800;
+    fill: var(--blue-text);
+  }
+
+  .cp-stamp__spin {
+    transform-origin: 100px 100px;
+  }
+
+  :global(.cp-motion) .cp-stamp__spin {
+    animation: cp-spin 30s linear infinite;
+  }
+
+  @keyframes cp-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* The tests as a numbered register on the left; the laboratory hung as a
+     small shed on the right, the same construction as the gallery. */
+  .cp-lab {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .cp-tests {
+    padding: 0;
+    margin: 0;
+    border-top: 3px solid var(--navy);
+  }
+
+  .cp-tests__row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: baseline;
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cp-tests__no {
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--blue-text);
+  }
+
+  .cp-tests__name {
+    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.8rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .cp-lab__shed {
+    margin: 0;
+  }
+
+  .cp-lab__shed :global(.cp-lab__roof) {
+    display: block;
+    width: 100%;
+    height: 2.25rem;
+  }
+
+  .cp-lab__wall {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 6px;
+    margin: 0;
+    background: var(--navy);
+  }
+
+  .cp-lab__panel {
+    position: relative;
+  }
+
+  .cp-lab__panel :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .cp-lab__label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 0.35rem 0.6rem;
+    background: var(--navy);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .cp-lab__caption {
+    margin-top: 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  /* Side by side, the shed stands exactly as tall as the register. */
+  @media (min-width: 52.01rem) {
+    .cp-lab {
+      align-items: stretch;
+    }
+
+    .cp-lab__shed {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cp-lab__wall {
+      flex: 1;
+      grid-auto-rows: minmax(0, 1fr);
+    }
+
+    .cp-lab__panel {
+      min-height: 0;
+    }
+
+    .cp-lab__panel :global(img) {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .cp-quality__head,
+    .cp-lab {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cp-stamp {
+      width: 11rem;
+    }
+  }
+
+  /* ----------------------------------------------------------- services */
+
+  .cp-services {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: var(--band);
+  }
+
+  /* The lines of work as a signboard: a grid of cells ruled in navy, each
+     with a photograph of the work, its number as a tag and its name in
+     signage type. The spare cell at the end asks for anything not listed. */
+  .cp-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    background: var(--navy);
+  }
+
+  .cp-board__cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--paper);
+    isolation: isolate;
+  }
+
+  .cp-board__cell :global(.cp-board__photo) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .cp-board__cell:hover :global(.cp-board__photo) {
+    transform: scale(1.04);
+  }
+
+  /* The orange sweep fills the cell from the left. */
+  .cp-board__cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 420ms var(--ease-in-out);
+  }
+
+  .cp-board__cell:hover::before {
+    transform: none;
+  }
+
+  .cp-board__no {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3em 0.55em 0.25em;
+    background: var(--navy);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--orange);
+  }
+
+  .cp-board__cell:hover .cp-board__no {
+    color: #fff;
+  }
+
+  .cp-board__name {
+    margin-top: auto;
+    padding: 1.1rem 1.25rem 1.25rem;
+    max-width: 24ch;
+    font-size: clamp(1.4rem, 1rem + 1.2vw, 2rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .cp-board__cell--ask {
+    justify-content: flex-end;
+    gap: 0.9rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    background: var(--blue);
+  }
+
+  .cp-board__cell--ask .cp-board__name {
+    padding: 0;
+  }
+
+  .cp-board__cell--ask::before {
+    display: none;
+  }
+
+  .cp-board__cell--ask .cp-board__name {
+    font-size: clamp(1.2rem, 1rem + 0.8vw, 1.5rem);
+    color: var(--on-blue);
+  }
+
+  .cp-board__cell--ask .text-link {
+    margin-top: 0;
+    color: var(--on-blue);
+  }
+
+  .cp-board__cell--ask .text-link::after {
+    color: var(--orange);
+  }
+
+  @media (max-width: 56rem) {
+    .cp-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .cp-board {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+  }
+
+  /* The workshop has no photograph yet, so it stands as a filled panel. */
+  .cp-shop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 0.75rem clamp(1.25rem, 3vw, 2.5rem);
+    align-items: baseline;
+    margin-top: clamp(2rem, 4vw, 3rem);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 3px solid var(--navy);
+    background: var(--blue);
+    font-size: 1.1rem;
+    color: var(--on-blue);
+  }
+
+  .cp-shop__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 1.2rem + 2vw, 3rem);
+    font-weight: 900;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 52rem) {
+    .cp-shop {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ------------------------------------------------------------ clients */
+
+  .cp-clients {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    overflow: hidden;
+  }
+
+  .cp-logos {
+    display: grid;
+    gap: 1rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .cp-logos__row {
+    display: flex;
+    width: max-content;
+  }
+
+  .cp-logos__set {
+    display: flex;
+    gap: 1rem;
+    padding-right: 1rem;
+  }
+
+  .cp-logos__cell {
+    display: grid;
+    place-items: center;
+    width: 11rem;
+    height: 5.5rem;
+    border: 1px solid var(--rule);
+    background: #fff;
+  }
+
+  .cp-logos__cell img {
+    width: auto;
+    max-width: 8rem;
+    max-height: 2.6rem;
+  }
+
+  /* Without motion the logos simply wrap as a grid, and the loop copies stay hidden. */
+  .cp-logos__set--copy {
+    display: none;
+  }
+
+  :global(html:not(.cp-motion)) .cp-logos {
+    width: min(100% - (var(--gutter) * 2), 88rem);
+    margin-inline: auto;
+  }
+
+  :global(html:not(.cp-motion)) .cp-logos__row {
+    width: auto;
+  }
+
+  :global(html:not(.cp-motion)) .cp-logos__set {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+    width: 100%;
+    padding-right: 0;
+  }
+
+  :global(html:not(.cp-motion)) .cp-logos__cell {
+    width: auto;
+  }
+
+  :global(html:not(.cp-motion)) .cp-logos__set--copy {
+    display: none;
+  }
+
+  :global(.cp-motion) .cp-logos__set--copy {
+    display: flex;
+  }
+
+  :global(.cp-motion) .cp-logos__row--1 {
+    animation: cp-drift 70s linear infinite;
+  }
+
+  :global(.cp-motion) .cp-logos__row--2 {
+    animation: cp-drift 70s linear infinite reverse;
+  }
+
+  .cp-logos:hover .cp-logos__row {
+    animation-play-state: paused;
+  }
+
+  @keyframes cp-drift {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ------------------------------------------------------- scroll reveals */
+
+  :global(.cp-motion) [data-cp] {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition:
+      opacity 650ms var(--ease-out),
+      transform 650ms var(--ease-out);
+  }
+
+  :global(.cp-motion) [data-cp].is-in {
+    opacity: 1;
+    transform: none;
+  }
+</style>

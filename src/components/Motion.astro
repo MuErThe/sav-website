@@ -1,0 +1,107 @@
+---
+/**
+ * Scroll-driven motion, shared by every theme.
+ *
+ * Progressive enhancement: nothing is hidden until this script has confirmed
+ * both JavaScript and the user's motion preference, so content is always
+ * reachable without it. Themes style `.is-in` for their own flourishes.
+ */
+---
+
+<script>
+  const REVEAL = [
+    '.chapter__head',
+    '.ledger__row',
+    '.record',
+    '.timeline__entry',
+    '.zero',
+    '.figure',
+    '.reason',
+    '.person',
+    '.register',
+    '.logo-cell',
+    '.call',
+    '.board',
+    '.ply-edge',
+    '.evidence',
+    '.panel',
+  ].join(',');
+
+  const COUNT = '.ledger__qty, .figure__value, .zero__value';
+
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /** Leading number of a figure such as "3L sq.ft.", "$120M+" or "150 Mt". */
+  function parseFigure(text: string): { before: string; value: number; after: string } | null {
+    const match = /^([^\d]*)(\d+)(.*)$/.exec(text.trim());
+    if (!match) return null;
+    return { before: match[1] ?? '', value: Number(match[2]), after: match[3] ?? '' };
+  }
+
+  /**
+   * Counts a figure up from zero. The final text stays in the DOM for screen
+   * readers; only an aria-hidden copy animates.
+   */
+  function prepareCounter(el: HTMLElement): void {
+    const final = el.textContent ?? '';
+    const figure = parseFigure(final);
+    if (!figure || figure.value === 0) return;
+
+    const shown = document.createElement('span');
+    shown.setAttribute('aria-hidden', 'true');
+    shown.textContent = `${figure.before}0${figure.after}`;
+    const spoken = document.createElement('span');
+    spoken.className = 'visually-hidden';
+    spoken.textContent = final;
+    el.replaceChildren(shown, spoken);
+
+    el.addEventListener(
+      'motion:in',
+      () => {
+        const start = performance.now();
+        const duration = 1100;
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          shown.textContent = `${figure.before}${Math.round(figure.value * eased)}${figure.after}`;
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      },
+      { once: true },
+    );
+  }
+
+  function start(): void {
+    if (calm.matches || !('IntersectionObserver' in window)) return;
+
+    document.documentElement.classList.add('motion');
+
+    const targets = Array.from(document.querySelectorAll<HTMLElement>(REVEAL));
+    targets.forEach((el) => el.classList.add('reveal'));
+
+    document.querySelectorAll<HTMLElement>(COUNT).forEach(prepareCounter);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Stagger only what arrives together, capped so long lists stay brisk;
+        // an item further down a list never waits on its place in it.
+        entries
+          .filter((entry) => entry.isIntersecting)
+          .forEach((entry, order) => {
+            const el = entry.target as HTMLElement;
+            el.style.setProperty('--reveal-i', String(Math.min(order, 6)));
+            el.classList.add('is-in');
+            el.querySelectorAll(COUNT).forEach((c) => c.dispatchEvent(new Event('motion:in')));
+            if (el.matches(COUNT)) el.dispatchEvent(new Event('motion:in'));
+            observer.unobserve(el);
+          });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+    );
+
+    targets.forEach((el) => observer.observe(el));
+  }
+
+  start();
+</script>

@@ -1,0 +1,51 @@
+---
+/**
+ * Organisation chart as a top-to-bottom flow: each role is a card with a line
+ * illustration of what the department does, joined to its parent by
+ * connector lines. The markup is a nested list, so the hierarchy reads the
+ * same to screen readers. Wide trees scroll sideways inside their own region:
+ * wrap the chart in an element marked `data-pan` and it can be dragged.
+ */
+import OrgFlowNode from './OrgFlowNode.astro';
+import type { OrgNode } from '../../data/people';
+
+interface Props {
+  node: OrgNode;
+}
+
+const { node } = Astro.props;
+---
+
+<ul class="orgflow" role="list" aria-label="Organisational structure, from the director down">
+  <OrgFlowNode node={node} depth={0} />
+</ul>
+
+<script>
+  // Drag to pan the chart sideways; the scrollbar itself is hidden.
+  document.querySelectorAll<HTMLElement>('[data-pan]').forEach((region) => {
+    let startX = 0;
+    let startScroll = 0;
+    let dragging = false;
+
+    region.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || region.scrollWidth <= region.clientWidth) return;
+      dragging = true;
+      startX = event.clientX;
+      startScroll = region.scrollLeft;
+      region.setPointerCapture(event.pointerId);
+      region.classList.add('is-panning');
+    });
+    region.addEventListener('pointermove', (event) => {
+      if (dragging) region.scrollLeft = startScroll - (event.clientX - startX);
+    });
+    const stop = () => {
+      dragging = false;
+      region.classList.remove('is-panning');
+    };
+    region.addEventListener('pointerup', stop);
+    region.addEventListener('pointercancel', stop);
+
+    // Start centred on the director, whose card sits in the middle of the tree.
+    region.scrollLeft = (region.scrollWidth - region.clientWidth) / 2;
+  });
+</script>

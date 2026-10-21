@@ -1,0 +1,23 @@
+---
+/**
+ * Numbered section heading: an outlined number over the display title. The
+ * number is decoration; the heading itself names the section for assistive tech.
+ */
+interface Props {
+  number: string;
+  title: string;
+  id: string;
+  lede?: string;
+  level?: 1 | 2;
+}
+
+const { number, title, id, lede, level = 2 } = Astro.props;
+const Heading = `h${level}` as 'h1' | 'h2';
+---
+
+<header class="chapter__head">
+  <p class="section-no" aria-hidden="true">{number}</p>
+  <Heading id={id} class="section-title">{title}</Heading>
+  {lede && <p class="lede">{lede}</p>}
+  <slot />
+</header>

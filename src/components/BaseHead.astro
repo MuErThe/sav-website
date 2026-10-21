@@ -1,0 +1,71 @@
+---
+import { url } from '../lib/paths';
+import { company } from '../data/company';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Google Fonts stylesheet URL for the active theme. */
+  fontHref?: string;
+  /** Browser UI colour; each theme passes its own page background. */
+  themeColor?: string;
+}
+
+const { title, description, fontHref, themeColor = '#08509f' } = Astro.props;
+const fullTitle = title === company.name ? `${company.name} | ${company.tagline}` : `${title} | ${company.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://sav.construction');
+/** Preview builds (GitHub Pages) stay out of search engines. */
+const preview = import.meta.env.PUBLIC_PREVIEW === 'true';
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+{preview && <meta name="robots" content="noindex, nofollow" />}
+
+<link rel="icon" href={url('/favicon.ico')} sizes="32x32" />
+<link rel="icon" href={url('/favicon-32.png')} type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+<link rel="manifest" href={url('/site.webmanifest')} />
+<meta name="theme-color" content={themeColor} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={company.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta name="twitter:card" content="summary_large_image" />
+
+{
+  fontHref && (
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link rel="stylesheet" href={fontHref} />
+    </>
+  )
+}
+
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'GeneralContractor',
+    name: company.name,
+    legalName: company.legalName,
+    description: company.description,
+    foundingDate: String(company.established),
+    telephone: '+91 7970022422',
+    email: 'info@sav.construction',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '79/2/3, Sukhniwas Gram, Cat Road',
+      addressLocality: 'Indore',
+      addressRegion: 'Madhya Pradesh',
+      postalCode: '452013',
+      addressCountry: 'IN',
+    },
+  })}
+/>

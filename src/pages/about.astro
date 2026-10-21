@@ -1,0 +1,900 @@
+---
+import { root } from '../lib/paths';
+import { Image } from 'astro:assets';
+import Layout from '../theme/Layout.astro';
+import { company, about, mission, vision, pillars, stats, whySav, culture } from '../data/company';
+import { cultureGallery } from '../lib/gallery';
+
+const base = `${root}`;
+const words = company.taglineWords;
+const photos = cultureGallery();
+
+---
+
+<Layout
+  title="About"
+  description="Established in 1995 as UPCL and re-established as SAV in 2025, SAV Construction delivers industrial and infrastructure projects from Indore, Madhya Pradesh."
+>
+  <!-- 01 · The name, set large: what SAV stands for. -->
+  <section class="ab-open" aria-labelledby="about-title">
+    <div class="shell ab-open__grid">
+      <h1 id="about-title" class="ab-open__title">
+        <span class="visually-hidden">About SAV Construction: </span>
+        {
+          words.map((word, i) => (
+            <span class={`ab-open__word ab-open__word--${i + 1}`}>
+              {word}
+              <span class="ab-open__stop" aria-hidden="true">.</span>
+            </span>
+          ))
+        }
+      </h1>
+      <div class="ab-open__below">
+        <div class="ab-open__facts">
+          <p class="ab-open__kicker">{company.legalName}</p>
+        </div>
+        <div class="ab-open__story">
+          <p class="ab-open__lead">{about.lead}</p>
+          <p class="ab-open__body">{about.strength.map((part) => (part.strong ? <strong>{part.text}</strong> : part.text))}</p>
+          <p class="ab-open__close">{about.pullQuote}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · The numbers, set as type rather than tiles. -->
+  <section class="ab-figures" aria-labelledby="figures-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">01</p>
+      <h2 id="figures-title" class="section-title ab-title">In numbers</h2>
+      <ul class="ab-figures__set" role="list">
+        {
+          stats.map((stat, i) => (
+            <li class={`ab-figure ab-figure--${i + 1}`} data-ab>
+              <p class="ab-figure__value" data-ab-count>{stat.value}</p>
+              <p class="ab-figure__label">{stat.label}</p>
+              <p class="ab-figure__detail">{stat.detail}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 03 · Mission, vision and the two pillars. -->
+  <section class="ab-purpose" aria-labelledby="purpose-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">02</p>
+      <h2 id="purpose-title" class="section-title ab-title">Mission and vision</h2>
+      <div class="ab-quotes">
+        <blockquote class="ab-quote ab-quote--mission" data-ab>
+          <h3 class="ab-quote__label">Mission</h3>
+          <span class="ab-quote__mark" aria-hidden="true">“</span>
+          <p class="ab-quote__text">{mission}</p>
+        </blockquote>
+        <blockquote class="ab-quote ab-quote--vision" data-ab>
+          <h3 class="ab-quote__label">Vision</h3>
+          <span class="ab-quote__mark" aria-hidden="true">“</span>
+          <p class="ab-quote__text">{vision}</p>
+        </blockquote>
+      </div>
+      <ol class="ab-pillars" role="list">
+        {
+          pillars.map((pillar, i) => (
+            <li class="ab-pillar" data-ab>
+              <p class="ab-pillar__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</p>
+              <div>
+                <h3 class="ab-pillar__title">{pillar.title}</h3>
+                <p class="ab-pillar__body">{pillar.body}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 04 · Why SAV, as a ruled ledger. -->
+  <section class="ab-why" id="why" aria-labelledby="why-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">03</p>
+      <h2 id="why-title" class="section-title ab-title">Seven things that set our delivery apart</h2>
+      <ol class="ab-why__list" role="list">
+        {
+          whySav.map((reason) => (
+            <li class:list={['ab-why__row', { 'ab-why__row--key': reason.highlight }]} data-ab>
+              <p class="ab-why__no" aria-hidden="true">{reason.number}</p>
+              <h3 class="ab-why__name">
+                {reason.title}
+                {reason.highlight && <span class="ab-why__tag">Our edge</span>}
+              </h3>
+              <p class="ab-why__body">{reason.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 05 · Culture, with the crew photographs offset around the text. -->
+  <section class="ab-crew" aria-labelledby="crew-title" data-ab-progress>
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">04</p>
+      <h2 id="crew-title" class="section-title ab-title">A team that works like a family</h2>
+    </div>
+    <div class="shell ab-crew__grid">
+      {
+        photos[0] && (
+          <figure class="ab-crew__photo ab-crew__photo--a" data-ab-drift="-1">
+            <Image src={photos[0].src} alt={photos[0].alt} widths={[400, photos[0].src.width]} sizes="(max-width: 52rem) 100vw, 30vw" loading="lazy" />
+            <figcaption>Fig. 01 · {photos[0].caption}</figcaption>
+          </figure>
+        )
+      }
+      <div class="ab-crew__text">
+        <p class="ab-crew__intro">{culture.intro}</p>
+        {culture.points.map((point) => <p class="ab-crew__point">{point}</p>)}
+        <a class="text-link" href={`${base}/people/`}>Meet the team</a>
+      </div>
+      {
+        photos[1] && (
+          <figure class="ab-crew__photo ab-crew__photo--b" data-ab-drift="1">
+            <Image src={photos[1].src} alt={photos[1].alt} widths={[400, photos[1].src.width]} sizes="(max-width: 52rem) 100vw, 30vw" loading="lazy" />
+            <figcaption>Fig. 02 · {photos[1].caption}</figcaption>
+          </figure>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- 06 · Closing band. -->
+  <div class="ab-band" aria-hidden="true">
+    <div class="ab-band__track">
+      {
+        [0, 1].map(() => (
+          <p class="ab-band__run">
+            <span>{company.backedBy}</span>
+            <span>Since {company.established}</span>
+            <span>Indore, Madhya Pradesh</span>
+            <span>{company.tagline}</span>
+          </p>
+        ))
+      }
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!calm.matches && 'IntersectionObserver' in window) {
+    document.documentElement.classList.add('ab-motion');
+
+    // Blocks settle in as they enter; figures count up once.
+    const countUp = (el: HTMLElement) => {
+      const final = el.textContent ?? '';
+      const match = /^([^\d]*)(\d+)(.*)$/.exec(final.trim());
+      if (!match) return;
+      const [, before = '', digits = '0', after = ''] = match;
+      const target = Number(digits);
+      const shown = document.createElement('span');
+      shown.setAttribute('aria-hidden', 'true');
+      const spoken = document.createElement('span');
+      spoken.className = 'visually-hidden';
+      spoken.textContent = final;
+      el.replaceChildren(shown, spoken);
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / 1400);
+        shown.textContent = `${before}${Math.round(target * (1 - Math.pow(1 - t, 3)))}${after}`;
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          el.classList.add('is-in');
+          el.querySelectorAll<HTMLElement>('[data-ab-count]').forEach(countUp);
+          observer.unobserve(el);
+        });
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.15 },
+    );
+    document.querySelectorAll('[data-ab]').forEach((el) => observer.observe(el));
+
+    // Scroll progress drives the photo drift; nothing moves the page itself.
+    // --p eases toward the scroll position rather than jumping to it, so a
+    // stepped mouse wheel still reads as one glide.
+    const tracked = Array.from(document.querySelectorAll<HTMLElement>('[data-ab-progress]'));
+    const shown = tracked.map(() => -1);
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const vh = window.innerHeight;
+      let settling = false;
+      tracked.forEach((section, i) => {
+        const r = section.getBoundingClientRect();
+        const target = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.6 + r.height * 0.4)));
+        const from = shown[i]!;
+        const next = from < 0 || Math.abs(target - from) < 0.001 ? target : from + (target - from) * 0.14;
+        if (next !== target) settling = true;
+        if (next !== from) section.style.setProperty('--p', next.toFixed(4));
+        shown[i] = next;
+      });
+      if (settling) request();
+    };
+    const request = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    update();
+  }
+</script>
+
+<style>
+  /* Space between the shared section heading and its content. */
+  .ab-title {
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  /* ------------------------------------------------------------ opening */
+
+  .ab-open {
+    padding-block: clamp(3rem, 7vw, 6rem) clamp(3.5rem, 7vw, 6rem);
+    border-bottom: 3px solid var(--navy);
+  }
+
+  .ab-open__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1rem, 2vw, 2rem);
+    align-items: start;
+  }
+
+  .ab-open__title {
+    display: contents;
+  }
+
+  .ab-open__word {
+    display: block;
+    /* A little air under each step so the words do not touch. */
+    padding-bottom: 0.1em;
+    font-size: clamp(3.2rem, 0.7rem + 10vw, 10.5rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--blue-text);
+  }
+
+  .ab-open__word--1 {
+    grid-column: 1 / 9;
+    grid-row: 1;
+  }
+
+  .ab-open__word--2 {
+    grid-column: 3 / 13;
+    grid-row: 2;
+  }
+
+  .ab-open__word--3 {
+    grid-column: 5 / 13;
+    grid-row: 3;
+  }
+
+  .ab-open__stop {
+    color: var(--orange);
+  }
+
+  /* Under the name: a rule, then the facts on the left and the story on the right. */
+  .ab-open__below {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.75rem clamp(1rem, 2vw, 2rem);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 3px solid var(--navy);
+  }
+
+  .ab-open__facts {
+    grid-column: 1 / 5;
+  }
+
+  .ab-open__kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-text);
+  }
+
+  .ab-open__story {
+    grid-column: 6 / 13;
+    max-width: 64ch;
+  }
+
+  .ab-open__lead {
+    font-size: clamp(1.2rem, 1rem + 0.7vw, 1.55rem);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+
+  .ab-open__body {
+    margin-top: 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+
+  .ab-open__body strong {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* The closing paragraph sits under a short orange rule. */
+  .ab-open__close {
+    position: relative;
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .ab-open__close::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3rem;
+    height: 4px;
+    background: var(--orange);
+  }
+
+  @media (max-width: 56rem) {
+    .ab-open__word--1,
+    .ab-open__word--2,
+    .ab-open__word--3 {
+      grid-column: 1 / -1;
+    }
+
+    .ab-open__word--2 {
+      padding-left: 8%;
+    }
+
+    .ab-open__word--3 {
+      padding-left: 16%;
+    }
+
+    .ab-open__facts,
+    .ab-open__story {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Words wipe in from alternating sides on load. */
+  :global(.ab-motion) .ab-open__word {
+    animation: ab-wipe-left 900ms var(--ease-in-out) both;
+  }
+
+  :global(.ab-motion) .ab-open__word--2 {
+    animation-name: ab-wipe-right;
+    animation-delay: 140ms;
+  }
+
+  :global(.ab-motion) .ab-open__word--3 {
+    animation-delay: 280ms;
+  }
+
+  :global(.ab-motion) .ab-open__below {
+    animation: ab-rise 800ms 520ms var(--ease-out) both;
+  }
+
+  @keyframes ab-wipe-left {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes ab-wipe-right {
+    from {
+      clip-path: inset(0 0 0 100%);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes ab-rise {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
+
+  /* ------------------------------------------------------------- figures */
+
+  .ab-figures {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .ab-figures__set {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: clamp(2.5rem, 5vw, 4rem);
+    column-gap: clamp(1rem, 2vw, 2rem);
+  }
+
+  .ab-figure {
+    padding-left: 1.1rem;
+    border-left: 3px solid var(--navy);
+  }
+
+  .ab-figure--1 {
+    grid-column: 1 / 8;
+  }
+
+  .ab-figure--2 {
+    grid-column: 9 / 13;
+    align-self: end;
+  }
+
+  .ab-figure--3 {
+    grid-column: 3 / 7;
+  }
+
+  .ab-figure--4 {
+    grid-column: 8 / 13;
+    margin-top: 3rem;
+  }
+
+  .ab-figure__value {
+    font-size: clamp(3rem, 1.8rem + 4.5vw, 6.5rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--blue-text);
+  }
+
+  .ab-figure--1 .ab-figure__value {
+    font-size: clamp(4rem, 2rem + 8vw, 11rem);
+    color: var(--ink);
+  }
+
+  .ab-figure__label {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .ab-figure__detail {
+    max-width: 30ch;
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 52rem) {
+    .ab-figure--1,
+    .ab-figure--2,
+    .ab-figure--3,
+    .ab-figure--4 {
+      grid-column: 1 / -1;
+      margin-top: 0;
+    }
+  }
+
+  /* ------------------------------------------------------------- purpose */
+
+  .ab-purpose {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    border-top: 3px solid var(--navy);
+  }
+
+  /* Mission and vision as two spoken statements, not two cards: a heavy
+     orange quotation mark opens each, the text runs large, and the label
+     closes it like a signature. The vision hangs lower across a hairline. */
+  .ab-quotes {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .ab-quote {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+
+  .ab-quote--vision {
+    margin-top: clamp(0rem, 8vw, 6rem);
+    padding-left: clamp(1.5rem, 3vw, 2.5rem);
+    border-left: 1px solid var(--rule);
+  }
+
+  .ab-quote__mark {
+    display: block;
+    height: 0.42em;
+    font-family: var(--font-display);
+    font-size: clamp(7rem, 3rem + 10vw, 15rem);
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--orange);
+  }
+
+  .ab-quote--vision .ab-quote__mark {
+    font-size: clamp(5rem, 2.5rem + 6vw, 10rem);
+  }
+
+  .ab-quote__text {
+    margin-top: 1.25rem;
+    font-size: clamp(1.4rem, 1rem + 1.4vw, 2.3rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+    color: var(--ink);
+  }
+
+  .ab-quote--vision .ab-quote__text {
+    font-size: clamp(1.15rem, 1rem + 0.7vw, 1.6rem);
+    line-height: 1.3;
+    color: var(--blue-text);
+  }
+
+  /* The label comes last on the page, first for a screen reader. */
+  .ab-quote__label {
+    order: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .ab-quote__label::before {
+    content: '';
+    width: 2.5rem;
+    height: 3px;
+    background: var(--navy);
+  }
+
+  /* The two pillars under one rule, numbered in blue, divided by a hairline. */
+  .ab-pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    margin-top: clamp(3rem, 6vw, 5rem);
+    border-top: 3px solid var(--navy);
+  }
+
+  .ab-pillar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    padding: clamp(1.25rem, 2.5vw, 2rem) clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  .ab-pillar:first-child {
+    padding-left: 0;
+  }
+
+  .ab-pillar + .ab-pillar {
+    border-left: 1px solid var(--rule);
+  }
+
+  .ab-pillar__no {
+    font-size: clamp(2.6rem, 2rem + 1.6vw, 3.6rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.8;
+    color: var(--blue-text);
+  }
+
+  .ab-pillar__title {
+    font-size: 1.35rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .ab-pillar__body {
+    margin-top: 0.5rem;
+    max-width: 44ch;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 56rem) {
+    .ab-quotes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ab-quote--vision {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .ab-pillar + .ab-pillar {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .ab-pillar {
+      padding-inline: 0;
+    }
+  }
+
+  /* ----------------------------------------------------------------- why */
+
+  .ab-why {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: var(--band);
+  }
+
+
+  .ab-why__list {
+    border-top: 3px solid var(--navy);
+  }
+
+  .ab-why__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(5rem, 9rem) minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 0.5rem clamp(1.5rem, 3vw, 3rem);
+    align-items: baseline;
+    padding: clamp(1.25rem, 2.5vw, 1.9rem) clamp(0.75rem, 1.5vw, 1.25rem);
+    border-bottom: 1px solid var(--rule);
+    isolation: isolate;
+  }
+
+  /* An orange wash sweeps across the row on hover. */
+  /* The orange sweep fills the row exactly between its rules. */
+  .ab-why__row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 450ms var(--ease-in-out);
+  }
+
+  .ab-why__row:hover::before {
+    transform: none;
+  }
+
+  .ab-why__row:hover .ab-why__body {
+    color: var(--ink);
+  }
+
+  .ab-why__no {
+    font-size: clamp(2.8rem, 1.8rem + 3vw, 5rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--blue-text);
+    transition: color 300ms ease;
+  }
+
+  .ab-why__row:hover .ab-why__no {
+    color: var(--ink);
+  }
+
+  .ab-why__name {
+    font-size: 1.3rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .ab-why__body {
+    color: var(--ink-muted);
+    transition: color 300ms ease;
+  }
+
+  /* The highlighted point sits on a solid orange row and keeps it on hover. */
+  .ab-why__row--key {
+    background: var(--orange);
+  }
+
+  .ab-why__row--key::before {
+    display: none;
+  }
+
+  .ab-why__row--key .ab-why__no,
+  .ab-why__row--key .ab-why__body {
+    color: var(--navy);
+  }
+
+  .ab-why__tag {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.3rem 0.5rem 0.25rem;
+    background: var(--navy);
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    vertical-align: 0.3em;
+    color: #fff;
+  }
+
+  @media (max-width: 52rem) {
+    .ab-why__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ---------------------------------------------------------------- crew */
+
+  .ab-crew {
+    --p: 0.5;
+    padding-block: clamp(4rem, 8vw, 7rem);
+    overflow: hidden;
+  }
+
+  .ab-crew__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .ab-crew__photo {
+    margin: 0;
+  }
+
+  .ab-crew__photo img {
+    width: 100%;
+    max-width: 580px;
+    height: auto;
+    box-shadow: 0.5rem 0.5rem 0 var(--orange);
+  }
+
+  .ab-crew__photo figcaption {
+    margin-top: 1.1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .ab-crew__photo--b {
+    margin-top: clamp(4rem, 12vw, 11rem);
+  }
+
+  /* Photos drift gently in opposite directions with scroll. */
+  :global(.ab-motion) [data-ab-drift='-1'] {
+    transform: translateY(calc((var(--p) - 0.5) * -60px));
+  }
+
+  :global(.ab-motion) [data-ab-drift='1'] {
+    transform: translateY(calc((var(--p) - 0.5) * 60px));
+  }
+
+
+  .ab-crew__intro {
+    margin-top: 1.25rem;
+    font-weight: 600;
+  }
+
+  .ab-crew__point {
+    margin-top: 1rem;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 52rem) {
+    .ab-crew__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ab-crew__photo--b {
+      margin-top: 0;
+    }
+  }
+
+  /* --------------------------------------------------------------- band */
+
+  .ab-band {
+    overflow: hidden;
+    border-block: 3px solid var(--navy);
+    background: var(--blue);
+  }
+
+  .ab-band__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .ab-band__run {
+    display: flex;
+    flex-shrink: 0;
+    padding-block: 1.1rem;
+    font-size: clamp(1.2rem, 1rem + 1vw, 1.9rem);
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--on-blue);
+  }
+
+  .ab-band__run span::after {
+    content: '/';
+    margin-inline: 1.5rem;
+    opacity: 0.5;
+  }
+
+  :global(.ab-motion) .ab-band__track {
+    animation: ab-marquee 40s linear infinite;
+  }
+
+  .ab-band:hover .ab-band__track {
+    animation-play-state: paused;
+  }
+
+  @keyframes ab-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ------------------------------------------------------- scroll reveals */
+
+  :global(.ab-motion) [data-ab] {
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 700ms var(--ease-out);
+  }
+
+  :global(.ab-motion) [data-ab].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  :global(.ab-motion) .ab-figure--2 {
+    transition-delay: 120ms;
+  }
+
+  :global(.ab-motion) .ab-figure--3 {
+    transition-delay: 60ms;
+  }
+
+  :global(.ab-motion) .ab-figure--4 {
+    transition-delay: 180ms;
+  }
+</style>

@@ -1,0 +1,110 @@
+---
+import { root } from '../../lib/paths';
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../theme/Layout.astro';
+import ProjectRecord from '../../components/ProjectRecord.astro';
+import SiteBoard from '../../components/SiteBoard.astro';
+import ProjectCarousel from '../../components/sections/ProjectCarousel.astro';
+import Enquiry from '../../components/sections/Enquiry.astro';
+import { projects, projectsNote, type Project } from '../../data/projects';
+import { galleryFor, usesPlaceholders } from '../../lib/gallery';
+import { contact } from '../../data/company';
+
+export const getStaticPaths = (() =>
+  projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+}
+
+const base = `${root}`;
+const { project } = Astro.props;
+const images = galleryFor(project.slug);
+const awaitingPhotos = usesPlaceholders(project.slug);
+const related = projects.filter((p) => p.sector === project.sector && p.slug !== project.slug).slice(0, 3);
+---
+
+<Layout title={project.name} description={project.summary}>
+  <section class="project-hero" aria-labelledby="project-title">
+    <div class="shell project-hero__grid">
+      <div>
+        <nav aria-label="Breadcrumb">
+          <ol class="breadcrumb" role="list">
+            <li><a href={`${base}/`}>Home</a></li>
+            <li><a href={`${base}/projects/`}>Projects</a></li>
+            <li aria-current="page">{project.name}</li>
+          </ol>
+        </nav>
+
+        <p class="section-no" aria-hidden="true">01</p>
+        <h1 id="project-title" class="section-title">{project.name}</h1>
+        <p class="lede">{project.summary}</p>
+      </div>
+
+      <SiteBoard project={project} />
+    </div>
+    <div class="ply-edge" aria-hidden="true"></div>
+  </section>
+
+  <section class="chapter" aria-labelledby="photos-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">02</p>
+      <h2 id="photos-title" class="section-title">
+        {images.length > 0 && !awaitingPhotos ? `On site at ${project.name}` : 'Site photography'}
+      </h2>
+
+      <div class="chapter__after">
+        {awaitingPhotos && images.length > 0 && (
+          <p class="notice">
+            Photography of this site is being collected. The images below are representative of
+            comparable work and are not this project.
+          </p>
+        )}
+        {
+          images.length > 0 ? (
+            <ProjectCarousel
+              images={images}
+              label={
+                awaitingPhotos
+                  ? 'Representative photography of comparable projects'
+                  : `${project.name} photographs`
+              }
+              variant="feature"
+            />
+          ) : (
+            <div class="empty-state">
+              <p class="empty-state__title">Photography is being collected for this project</p>
+              <p class="empty-state__body">
+                We hold full records for this site and can share images on request. Email us at{' '}
+                <a href={contact.emailHref}>{contact.email}</a> and we will send them over.
+              </p>
+            </div>
+          )
+        }
+      </div>
+
+      <p class="small-print">{projectsNote}</p>
+    </div>
+  </section>
+
+  {
+    related.length > 0 && (
+      <section class="chapter chapter--raised" aria-labelledby="related-title">
+        <div class="shell">
+          <p class="section-no" aria-hidden="true">03</p>
+          <h2 id="related-title" class="section-title">Other {project.sector.toLowerCase()} projects</h2>
+          <ul class="records" role="list">
+            {related.map((item) => (
+              <ProjectRecord project={item} base={base} />
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <Enquiry base={base} title="Planning something similar?" />
+</Layout>

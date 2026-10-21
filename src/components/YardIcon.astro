@@ -1,0 +1,34 @@
+---
+/**
+ * Outline drawings of what the yard holds: a stack of shuttering ply, a bay of
+ * cup-lock scaffolding, a toolbox and a tipper truck. Drawn on a 48-unit grid
+ * in the current colour, so each theme sets the size and stroke colour.
+ */
+import type { YardIconName } from '../data/company';
+
+interface Props {
+  name: YardIconName;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+
+const ART: Record<YardIconName, string> = {
+  // A steel shuttering panel with its stiffening ribs, beside a stack of ply.
+  shuttering:
+    'M5 7h16v34H5Z M5 18h16M5 29h16M13 7v34 M24 31l9-5h11l-9 5Z M24 31h11v4H24Z M35 31l9-5v4l-9 5Z M24 37h11v4H24Z M35 37l9-5v4l-9 5Z',
+  // A cup-lock bay: two standards, three ledgers held in cups, a brace and base plates.
+  scaffolding:
+    'M12 4v40M36 4v40 M12 14h24M12 26h24M12 38h24 M12 38 36 14 M7 44h10M31 44h10 M9 12v4h6v-4M33 12v4h6v-4M9 24v4h6v-4M33 24v4h6v-4M9 36v4h6v-4M33 36v4h6v-4',
+  // A cog with a spanner laid across it.
+  tools:
+    'M27.2 28.5 L30.8 28.9 L30.8 33.1 L27.2 33.5 L26.0 36.4 L28.3 39.3 L25.3 42.3 L22.4 40.0 L19.5 41.2 L19.1 44.8 L14.9 44.8 L14.5 41.2 L11.6 40.0 L8.7 42.3 L5.7 39.3 L8.0 36.4 L6.8 33.5 L3.2 33.1 L3.2 28.9 L6.8 28.5 L8.0 25.6 L5.7 22.7 L8.7 19.7 L11.6 22.0 L14.5 20.8 L14.9 17.2 L19.1 17.2 L19.5 20.8 L22.4 22.0 L25.3 19.7 L28.3 22.7 L26.0 25.6Z M21.5 31a4.5 4.5 0 1 0-9 0a4.5 4.5 0 1 0 9 0 M23.3 23.3 L32.5 14.1 L29.9 11.6 L33.5 8.0 L39.0 7.9 L36.7 11.9 L38.1 13.3 L42.1 11.0 L42.0 16.5 L38.4 20.1 L35.9 17.5 L26.7 26.7Z',
+  // A tipper truck in profile, body raised on the chassis.
+  vehicles:
+    'M3 34V22h8l4-7h9v19 M12 22h8v-5 M24 14h18l3 18H24Z M31 15l1 15 M3 34h42 M14 38a4 4 0 1 0-8 0a4 4 0 1 0 8 0 M34 38a4 4 0 1 0-8 0a4 4 0 1 0 8 0 M43 38a4 4 0 1 0-8 0a4 4 0 1 0 8 0',
+};
+---
+
+<svg class={className} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+  <path d={ART[name]}></path>
+</svg>

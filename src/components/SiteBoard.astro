@@ -1,0 +1,37 @@
+---
+/**
+ * Project facts laid out like the signboard at the gate of an Indian
+ * construction site: name of work, location, area, contractor.
+ */
+import { company } from '../data/company';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+
+const rows = [
+  { label: 'Name of work', value: project.client ?? project.name },
+  project.location ? { label: 'Location', value: project.location } : null,
+  project.area ? { label: 'Built-up area', value: project.area } : null,
+  { label: 'Sector', value: project.sector },
+  { label: 'Scope', value: project.scope },
+  { label: 'Contractor', value: company.legalName },
+].filter((row): row is { label: string; value: string } => row !== null);
+---
+
+<div class="board">
+  <p class="board__head">Site board</p>
+  <dl class="board__rows">
+    {
+      rows.map((row) => (
+        <div class="board__row">
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
