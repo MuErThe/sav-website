@@ -56,6 +56,7 @@ const graph = [
     image: new URL(url('/og/default.jpg'), site).href,
     description: company.description,
     slogan: company.tagline,
+    sameAs: [contact.linkedin],
     foundingDate: String(company.established),
     telephone: contact.phone,
     email: contact.email,

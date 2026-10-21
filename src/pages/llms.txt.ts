@@ -19,6 +19,7 @@ export const GET: APIRoute = ({ site }) => {
 - Works in: ${serviceArea.places.join(', ')}.
 - Expertise: ${expertise.join(', ')}.
 - Contact: ${contact.phone}, ${contact.email}. Head office: ${contact.offices[1]?.lines.join(', ')}.
+- LinkedIn: ${contact.linkedin}
 
 ## Pages
 

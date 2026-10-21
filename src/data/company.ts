@@ -33,6 +33,7 @@ export const contact = {
   phoneHref: 'tel:+917970022422',
   email: 'info@sav.construction',
   emailHref: 'mailto:info@sav.construction',
+  linkedin: 'https://www.linkedin.com/company/sav-construction-pvt-ltd/',
   offices: [
     {
       label: 'Registered office',

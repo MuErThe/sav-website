@@ -88,11 +88,29 @@ const lines = [
     border-top: 3px solid var(--navy);
   }
 
+  /* Call and email sit side by side, a rule between them; phones stack them. */
+  .ct-lines {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .ct-line {
     position: relative;
     display: grid;
-    grid-template-columns: 7rem minmax(0, 1fr);
-    align-items: center;
+    grid-template-rows: auto 1fr;
+    gap: 0.5rem;
+    padding-top: clamp(1rem, 2vw, 1.5rem);
+    /* The figures size to their column, so the email always fits on one line. */
+    container-type: inline-size;
+  }
+
+  .ct-line + .ct-line {
+    padding-left: clamp(1rem, 2.5vw, 2rem);
+    border-left: 2px solid var(--navy);
+  }
+
+  .ct-line__label {
+    padding-inline: 0.75rem;
   }
 
   /* Each rule draws across as its line arrives. */
@@ -132,7 +150,7 @@ const lines = [
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--blue);
+    background: var(--orange);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 420ms var(--ease-out);
@@ -145,7 +163,7 @@ const lines = [
 
   .ct-line__link:hover,
   .ct-line__link:focus-visible {
-    color: var(--on-blue);
+    color: var(--navy);
   }
 
   .ct-line__link:focus-visible {
@@ -155,7 +173,7 @@ const lines = [
 
   .ct-line__value {
     min-width: 0;
-    font-size: clamp(1.5rem, 0.2rem + 6.4vw, 6rem);
+    font-size: clamp(1.4rem, 9cqi, 4.5rem);
     font-family: var(--font-display);
     font-weight: 900;
     line-height: 0.95;
@@ -174,7 +192,7 @@ const lines = [
 
   .ct-line__link:hover .ct-line__arrow,
   .ct-line__link:focus-visible .ct-line__arrow {
-    stroke: var(--on-blue);
+    stroke: var(--navy);
     transform: translate(0.25rem, -0.25rem);
   }
 
@@ -206,21 +224,27 @@ const lines = [
     border-bottom: 2px solid var(--navy);
     background-color: transparent;
     font-size: 1.1rem;
-    transition: border-color 160ms ease, background-color 160ms ease;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
   }
 
   .ct-form :global(.field__input:hover) {
     background-color: var(--paper);
   }
 
-  .ct-form :global(.field__input:focus) {
+  /* No outline on focus, at the user's request: the underline turns blue and
+     thickens, and the field fills white, so the active field still stands out. */
+  .ct-form :global(.field__input:focus),
+  .ct-form :global(.field__input:focus-visible) {
+    outline: none;
     border-bottom-color: var(--blue-text);
+    box-shadow: inset 0 -1px 0 var(--blue-text);
     background-color: var(--card);
   }
 
-  .ct-form :global(.field__input:focus-visible) {
-    outline: 3px solid var(--sav-blue);
-    outline-offset: 2px;
+  .ct-form :global(.field__textarea:focus),
+  .ct-form :global(.field__textarea:focus-visible) {
+    border-color: var(--blue-text);
+    box-shadow: inset 0 0 0 1px var(--blue-text);
   }
 
   .ct-form :global(.field__textarea) {
@@ -346,10 +370,14 @@ const lines = [
     }
   }
 
-  @media (max-width: 36rem) {
-    .ct-line {
+  @media (max-width: 44rem) {
+    .ct-lines {
       grid-template-columns: minmax(0, 1fr);
-      padding-top: 1rem;
+    }
+
+    .ct-line + .ct-line {
+      padding-left: 0;
+      border-left: 0;
     }
   }
 
