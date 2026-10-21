@@ -4,16 +4,28 @@ import { Image } from 'astro:assets';
 import Layout from '../theme/Layout.astro';
 import { company, about, mission, vision, pillars, stats, whySav, culture } from '../data/company';
 import { cultureGallery } from '../lib/gallery';
+import { faqs } from '../data/seo';
 
 const base = `${root}`;
 const words = company.taglineWords;
 const photos = cultureGallery();
 
+/** The questions below, as FAQPage data for search and answer engines. */
+const faqSchema = {
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+  })),
+};
+
 ---
 
 <Layout
-  title="About"
-  description="Established in 1995 as UPCL and re-established as SAV in 2025, SAV Construction delivers industrial and infrastructure projects from Indore, Madhya Pradesh."
+  title="About SAV Construction, formerly UPCL"
+  description="Established in 1995 as United Project Construction (UPCL) and re-established as SAV Construction in 2025: an ISO 9001:2015 industrial contractor in Indore."
+  schema={[faqSchema]}
 >
   <!-- 01 · The name, set large: what SAV stands for. -->
   <section class="ab-open" aria-labelledby="about-title">
@@ -147,7 +159,25 @@ const photos = cultureGallery();
     </div>
   </section>
 
-  <!-- 06 · Closing band. -->
+  <!-- 06 · Questions clients and search engines ask, answered in plain sentences. -->
+  <section class="ab-faq" id="faq" aria-labelledby="faq-title">
+    <div class="shell">
+      <p class="section-no" aria-hidden="true">05</p>
+      <h2 id="faq-title" class="section-title ab-title">Questions we are often asked</h2>
+      <dl class="ab-faq__list">
+        {
+          faqs.map((faq) => (
+            <div class="ab-faq__row" data-ab>
+              <dt class="ab-faq__q">{faq.question}</dt>
+              <dd class="ab-faq__a">{faq.answer}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- 07 · Closing band. -->
   <div class="ab-band" aria-hidden="true">
     <div class="ab-band__track">
       {
@@ -658,6 +688,46 @@ const photos = cultureGallery();
   .ab-why {
     padding-block: clamp(3.5rem, 7vw, 6rem);
     background: var(--band);
+  }
+
+  /* ---------------------------------------------------------------- faq */
+
+  .ab-faq {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .ab-faq__list {
+    margin: 0;
+    border-top: 3px solid var(--navy);
+  }
+
+  .ab-faq__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 0.75rem clamp(1.5rem, 3vw, 3rem);
+    padding: clamp(1.25rem, 2.5vw, 1.75rem) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ab-faq__q {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.15;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .ab-faq__a {
+    margin: 0;
+    max-width: var(--measure);
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 44rem) {
+    .ab-faq__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
 

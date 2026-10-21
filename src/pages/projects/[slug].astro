@@ -25,9 +25,31 @@ const { project } = Astro.props;
 const images = galleryFor(project.slug);
 const awaitingPhotos = usesPlaceholders(project.slug);
 const related = projects.filter((p) => p.sector === project.sector && p.slug !== project.slug).slice(0, 3);
+
+const site = Astro.site ?? new URL('https://sav.construction');
+const breadcrumbs = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: 'Home', path: '/' },
+    { name: 'Projects', path: '/projects/' },
+    { name: project.name, path: `/projects/${project.slug}/` },
+  ].map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.name,
+    item: new URL(`${base}${crumb.path}`, site).href,
+  })),
+};
 ---
 
-<Layout title={project.name} description={project.summary}>
+<Layout
+  title={`${project.name}: ${project.scope.toLowerCase()}`}
+  description={`${project.summary} Built by SAV Construction, formerly UPCL.`}
+  image={`/og/${project.slug}.jpg`}
+  imageAlt={`${project.name}, ${project.scope.toLowerCase()} by SAV Construction`}
+  type="article"
+  schema={[breadcrumbs]}
+>
   <section class="project-hero" aria-labelledby="project-title">
     <div class="shell project-hero__grid">
       <div>

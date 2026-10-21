@@ -16,9 +16,14 @@ import './theme.css';
 interface Props {
   title: string;
   description: string;
+  fullTitle?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  schema?: readonly Record<string, unknown>[];
 }
 
-const { title, description } = Astro.props;
+const { title, description, fullTitle, image, imageAlt, type, schema } = Astro.props;
 const nav = navFor();
 const path = Astro.url.pathname;
 const year = new Date().getFullYear();
@@ -35,6 +40,11 @@ const fontHref =
     <BaseHead
       title={title}
       description={description}
+      fullTitle={fullTitle}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      schema={schema}
       fontHref={fontHref}
       themeColor="#f3f5f8"
     />

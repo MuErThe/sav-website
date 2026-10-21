@@ -1,42 +1,139 @@
 ---
 import { url } from '../lib/paths';
-import { company } from '../data/company';
+import { company, contact, quality } from '../data/company';
+import { brandNames, expertise, serviceArea } from '../data/seo';
+import { OG_HEIGHT, OG_WIDTH } from '../lib/og';
+import savLogo from '../assets/brand/sav-logo.png';
 
 interface Props {
   title: string;
   description: string;
+  /** Replaces the "Title | SAV Construction" pattern, for the home page. */
+  fullTitle?: string;
+  /** Site-relative share image, 1200 x 630; defaults to the branded image. */
+  image?: string;
+  imageAlt?: string;
+  /** Open Graph type: project pages are articles, everything else a website. */
+  type?: 'website' | 'article';
+  /** Extra schema.org nodes for this page, joined to the site-wide graph. */
+  schema?: readonly Record<string, unknown>[];
   /** Google Fonts stylesheet URL for the active theme. */
   fontHref?: string;
   /** Browser UI colour; each theme passes its own page background. */
   themeColor?: string;
 }
 
-const { title, description, fontHref, themeColor = '#08509f' } = Astro.props;
-const fullTitle = title === company.name ? `${company.name} | ${company.tagline}` : `${title} | ${company.name}`;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://sav.construction');
-/** Preview builds (GitHub Pages) stay out of search engines. */
+const {
+  title,
+  description,
+  fullTitle = `${title} | ${company.name}`,
+  image = '/og/default.jpg',
+  imageAlt = `${company.name}, formerly UPCL: industrial and pharmaceutical construction in Indore`,
+  type = 'website',
+  schema = [],
+  fontHref,
+  themeColor = '#08509f',
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://sav.construction');
+const canonical = new URL(Astro.url.pathname, site).href;
+const imageUrl = new URL(url(image), site).href;
+/** Preview builds stay out of search engines. */
 const preview = import.meta.env.PUBLIC_PREVIEW === 'true';
+
+const organisationId = new URL('/#organization', site).href;
+const websiteId = new URL('/#website', site).href;
+
+const graph = [
+  {
+    '@type': 'GeneralContractor',
+    '@id': organisationId,
+    name: company.name,
+    alternateName: brandNames.filter((name) => name !== company.name),
+    legalName: company.legalName,
+    url: new URL('/', site).href,
+    logo: new URL(savLogo.src, site).href,
+    image: new URL(url('/og/default.jpg'), site).href,
+    description: company.description,
+    slogan: company.tagline,
+    foundingDate: String(company.established),
+    telephone: contact.phone,
+    email: contact.email,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '79/2/3, Sukhniwas Gram, Cat Road',
+      addressLocality: 'Indore',
+      addressRegion: 'Madhya Pradesh',
+      postalCode: '452013',
+      addressCountry: 'IN',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      telephone: contact.phone,
+      email: contact.email,
+      areaServed: 'IN',
+    },
+    areaServed: serviceArea.places.map((name) => ({ '@type': 'Place', name })),
+    knowsAbout: expertise,
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'certification',
+      name: quality.certification,
+    },
+  },
+  {
+    '@type': 'WebSite',
+    '@id': websiteId,
+    url: new URL('/', site).href,
+    name: company.name,
+    alternateName: brandNames.filter((name) => name !== company.name),
+    inLanguage: 'en-IN',
+    publisher: { '@id': organisationId },
+  },
+  ...schema,
+];
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical.href} />
-{preview && <meta name="robots" content="noindex, nofollow" />}
+<link rel="canonical" href={canonical} />
+{
+  preview ? (
+    <meta name="robots" content="noindex, nofollow" />
+  ) : (
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+  )
+}
+
+<!-- Share previews: WhatsApp reads these from the first 300 KB of the page, so they sit at the top. -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={company.name} />
+<meta property="og:locale" content="en_IN" />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:secure_url" content={imageUrl} />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content={String(OG_WIDTH)} />
+<meta property="og:image:height" content={String(OG_HEIGHT)} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="twitter:image:alt" content={imageAlt} />
 
 <link rel="icon" href={url('/favicon.ico')} sizes="32x32" />
 <link rel="icon" href={url('/favicon-32.png')} type="image/png" sizes="32x32" />
 <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
 <link rel="manifest" href={url('/site.webmanifest')} />
+<link rel="sitemap" href={url('/sitemap.xml')} />
+<link rel="alternate" type="text/plain" title="LLM summary" href={url('/llms.txt')} />
 <meta name="theme-color" content={themeColor} />
-
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content={company.name} />
-<meta property="og:title" content={fullTitle} />
-<meta property="og:description" content={description} />
-<meta property="og:url" content={canonical.href} />
-<meta name="twitter:card" content="summary_large_image" />
 
 {
   fontHref && (
@@ -48,24 +145,4 @@ const preview = import.meta.env.PUBLIC_PREVIEW === 'true';
   )
 }
 
-<script
-  type="application/ld+json"
-  set:html={JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'GeneralContractor',
-    name: company.name,
-    legalName: company.legalName,
-    description: company.description,
-    foundingDate: String(company.established),
-    telephone: '+91 7970022422',
-    email: 'info@sav.construction',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: '79/2/3, Sukhniwas Gram, Cat Road',
-      addressLocality: 'Indore',
-      addressRegion: 'Madhya Pradesh',
-      postalCode: '452013',
-      addressCountry: 'IN',
-    },
-  })}
-/>
+<script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })} />
