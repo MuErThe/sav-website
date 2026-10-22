@@ -1,45 +1,56 @@
 # SAV Construction website
 
-The main website for Solid Assured Valued Construction Pvt. Ltd., built with
-[Astro](https://astro.build) as a static site and hosted on Vercel.
+The website for Solid Assured Valued Construction Pvt. Ltd., formerly UPCL. It is a static
+site built with [Astro](https://astro.build) and deployed on Vercel from the `main` branch
+of the GitHub repository: every push to `main` publishes the site.
 
-## Running it
+## Run it
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321
-npm run build    # static output in dist/
-npm run preview  # serve the built output
-npm run check    # TypeScript + Astro diagnostics
+npm run dev      # local site at http://localhost:4321
+npm run check    # type and template checks; must report 0 errors
+npm run build    # the published site, in dist/
 ```
 
-## Project layout
+## Where things live
 
-```
-assets/           Client-supplied originals, kept for reference (not built)
-public/           Favicons, web manifest and hero video, served from the site root
-src/
-  data/           Content: company facts, projects, people, clients, story
-  lib/            gallery.ts (image collections), nav.ts (routes), paths.ts (base path)
-  assets/         Source imagery, optimised at build time
-  components/     Shared components; sections/ holds the home page sections
-  styles/base.css Reset, brand palette, motion curves, focus behaviour, form structure
-  theme/          Layout.astro and theme.css
-  pages/          Home, about, projects, capabilities, gallery, people, contact
-```
-
-## Environment
-
-| Variable | Purpose |
+| What | Where |
 | --- | --- |
-| `PUBLIC_CONTACT_ENDPOINT` | Where the contact form posts. Unset, the form shows the phone number and email instead. |
-| `SITE_URL` | Canonical address. Defaults to `https://www.sav.construction`. |
-| `BASE_PATH` | Only if the site is served under a sub-path. Defaults to `/`. |
-| `PUBLIC_PREVIEW` | Set to `true` on preview deployments to add `noindex, nofollow`. |
+| Company facts: names, phone, email, offices, ISO, yard stock, safety | `src/data/company.ts` |
+| Projects | `src/data/projects.ts` |
+| People and the organisation chart | `src/data/people.ts` |
+| Client logos | `src/data/clients.ts` and `src/assets/clients/` |
+| Home page wording | `src/data/story.ts` |
+| Search, sharing and the FAQ | `src/data/seo.ts` |
+| Photographs | `src/assets/` |
 
-Copy `.env.example` to `.env` for local values. Never commit `.env`.
+Change a fact in its data file and every page that shows it updates.
 
-## Deploying on Vercel
+## Add a project
 
-Vercel detects Astro automatically: build command `npm run build`, output `dist`.
-Set the variables above in the Vercel project settings.
+1. Add an entry to `src/data/projects.ts`. Copy an existing one and fill in `slug` (lower
+   case, hyphens, used in the address), `name`, `sector`, `scope`, `summary` and
+   `featured`. `location` and `area` are optional.
+2. Make a folder `src/assets/projects/<slug>/` and put the photographs in it as JPG,
+   named `01-what-it-shows.jpg`, `02-...`. The number sets the order and the rest of the
+   name becomes the caption. Use the largest original you have, at least 1600 px wide;
+   the build makes every smaller size itself.
+3. Run `npm run build`. The project page, its share image and the sitemap entry appear.
+
+A project with no photographs borrows a related one, marked as representative.
+
+## Contact form
+
+The form posts to the address in `PUBLIC_CONTACT_ENDPOINT` (see `.env.example`). Until
+that is set, it tells visitors the message was not sent and gives the phone and email.
+
+## Checking a change
+
+`audit/` holds the site audit and its harness. `audit/pass.sh <label> --shots` builds the
+site and compares every page's text, links, metadata and screenshots with the baseline.
+
+## Known limitations
+
+- The hero video is a stock clip, not an SAV site.
+- Several projects show representative photographs until their own are supplied.

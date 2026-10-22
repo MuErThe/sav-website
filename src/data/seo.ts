@@ -47,8 +47,6 @@ export const expertise = [
 
 /** Places SAV builds, most local first. */
 export const serviceArea = {
-  city: 'Indore',
-  region: 'Madhya Pradesh',
   places: ['Indore', 'Pithampur', 'Dewas', 'Betma', 'Ujjain', 'Bhopal', 'Mandideep', 'Madhya Pradesh', 'Gujarat', 'India'],
 } as const;
 

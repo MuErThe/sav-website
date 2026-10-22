@@ -1,6 +1,6 @@
 /**
  * The site's root, without a trailing slash: empty locally, or the repository
- * path when the site is published under one (e.g. "/sav-site" on GitHub Pages).
+ * path when the site is published under one (e.g. "/preview" on a sub-path host).
  * Every hard-coded internal link starts from here, so the base path is set once.
  */
 export const root = import.meta.env.BASE_URL.replace(/\/$/, '');

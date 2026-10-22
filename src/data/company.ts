@@ -1,6 +1,6 @@
 /**
  * Company facts, taken from the SAV Construction company profile deck and the
- * director's corrections of 18 October 2026. Every theme reads from here, so
+ * director's corrections of 18 October 2026. Every page reads from here, so
  * copy only ever has to be corrected once.
  */
 
@@ -14,8 +14,6 @@ export const company = {
   reEstablished: 2025,
   description:
     'Industrial and infrastructure contractor based in Indore, delivering pharmaceutical plants, industrial sheds and site development across India.',
-  /** Sectors in the director's order; industrial work is the large majority. */
-  sectors: ['Industrial', 'Pharmaceutical', 'Commercial', 'Institutional', 'Infrastructure', 'Residential'],
 } as const;
 
 /**
@@ -98,6 +96,10 @@ export interface Stat {
   readonly detail: string;
 }
 
+/**
+ * Headline figures, as given in the company profile deck. No further
+ * source is on file for revenue, project count, client count or years.
+ */
 export const stats: readonly Stat[] = [
   { value: '$120M+', label: 'Revenue', detail: 'Reflecting our steady growth and stability in the industry' },
   { value: '70+', label: 'Successful global projects', detail: 'Delivered with our expertise' },
@@ -175,6 +177,7 @@ export const services = {
   ],
 } as const;
 
+/** Safety record and policy, from the company profile deck. */
 export const safety = {
   headlineValue: '0',
   headlineLabel: 'Accidents recorded across our major project sites.',
@@ -193,13 +196,6 @@ export const safety = {
     'Providing separate sanitation facilities for male and female workers.',
     'Offering first aid and emergency response provisions.',
   ],
-  environment: {
-    scope: 'Land, water and air',
-    items: [
-      'Proper segregation, storage, and disposal of waste materials, including toxic and hazardous wastes, are ensured.',
-      'Guarantee the proper and secure storage and stacking of construction materials.',
-    ],
-  },
 } as const;
 
 /** From the ISO certificate held by the company. */
@@ -210,13 +206,6 @@ export const quality = {
   certification: `${isoStandard} (Quality Management System) Certified Firm`,
   policy:
     "Quality is paramount in SAV's operations, shaping every facet of our work. Our skilled and dedicated workforce is instrumental in upholding rigorous standards, serving as both subjects of quality control and catalysts for enhancing quality across our operations.",
-  measures: [
-    'Appointing Quality Control Engineers based on their ability to deliver the required quality of work.',
-    'Performing thorough qualification assessments of sub-units to ensure comprehensive quality across technical, managerial, service, and social aspects.',
-    'Certifying operating workers, especially those in critical technical and specialised trades, through recognised institutions.',
-    "Conducting training, discussions, and exchange activities to enhance staff's quality consciousness.",
-    'Enforcing stringent on-site management systems and production discipline, adhering to standard operational technology and management practices.',
-  ],
   tests: [
     'Soil investigation',
     'Plate load test',
@@ -232,6 +221,7 @@ export const quality = {
 /** Line drawings for the stock ledger, see `components/YardIcon.astro`. */
 export type YardIconName = 'shuttering' | 'scaffolding' | 'tools' | 'vehicles';
 
+/** Yard stock, from the company profile deck and the director's corrections. */
 export const warehouse = {
   note: 'A 5-acre warehouse and yard in Indore',
   acres: '5 acres',

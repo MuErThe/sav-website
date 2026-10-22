@@ -1,4 +1,10 @@
 ---
+/**
+ * Page shell for every route: head (via BaseHead), top bar, header with the
+ * collapsible mobile menu, main content slot, footer, and the shared reveal.
+ * Props: title, description, fullTitle, image, imageAlt, type, schema,
+ * noindex (all passed straight to BaseHead). Used by every page.
+ */
 import { root } from '../lib/paths';
 import { Image } from 'astro:assets';
 import BaseHead from '../components/BaseHead.astro';
@@ -224,6 +230,13 @@ const fontHref =
     <Motion />
 
     <script>
+      /*
+       * Mobile menu. Below 60rem the nav collapses behind the Menu button:
+       * the button's aria-expanded drives the nav's hidden attribute, the
+       * page behind is locked (.menu-open), Escape closes it and returns
+       * focus to the button, and widening the window closes it. Above 60rem
+       * the nav is always shown. No animation, so reduced motion is unaffected.
+       */
       const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
       const nav = document.getElementById('primary-nav');
       const mobile = window.matchMedia('(max-width: 60rem)');

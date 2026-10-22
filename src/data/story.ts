@@ -10,21 +10,17 @@ import { projects, type Project } from './projects';
 
 /**
  * Written for the people who shortlist contractors: plant owners, project
- * heads and consultants. Kept to one headline, one line of proof and two
- * actions; who trusts SAV and why it delivers follow in the sections below.
+ * heads and consultants. Kept to one headline, one line of proof and one
+ * action; who trusts SAV and why it delivers follow in the sections below.
  */
 export const hero = {
   titleLead: 'We build',
-  /** The phrase each theme gives its visual emphasis. */
-  titleEmphasis: 'industrial plants',
-  titleRest: 'and pharmaceutical facilities, on time.',
   /** One short line of proof; the client names follow in the trust strip. */
   proof: [
     { value: stats[2]!.value, label: 'years' },
     { value: stats[1]!.value, label: 'projects' },
     { value: safety.headlineValue, label: 'accidents recorded' },
   ],
-  primaryCta: 'Start an enquiry',
   secondaryCta: 'See our projects',
 } as const;
 
@@ -79,8 +75,6 @@ export const trust = {
     'airports-authority-of-india',
     'sava-healthcare',
   ],
-  /** Used by B's logo strip; A's strip no longer links out. */
-  more: 'See all our clients',
 } as const;
 
 /**
@@ -90,7 +84,6 @@ export const trust = {
 export const yard = {
   figure: '3.5 lakh sq ft',
   title: 'of shuttering in our own yard.',
-  promise: 'Your programme doesn’t wait on anyone else’s stock.',
   lede: 'Most contractors hire their formwork and staging. We own ours: shuttering, cup-lock scaffolding, machinery and vehicles, held in our Indore warehouse and sent to site when the programme calls for it.',
   imageCaption: 'Our yard in Indore: shuttering, staging and plant, held in-house.',
 } as const;
@@ -112,9 +105,6 @@ export const pharmaProjects = projects.filter((p) => p.sector === PHARMA);
 export const pharma = {
   title: 'Pharmaceutical plants, built to the strictest standards',
   lede: `Pharmaceutical plants are held to some of the most demanding standards in construction. ${pharmaProjects.length} of the ${projects.length} projects in our portfolio are pharma plants, from Sava Healthcare’s 3,50,000 sq ft facility at Pithampur to Lupin and Unichem.`,
-  /** Logo files in `src/assets/clients/` for the pharmaceutical clients. */
-  clientFiles: ['sava-healthcare', 'alembic', 'gufic', 'lupin', 'unichem', 'piramal'],
-  othersTitle: 'Industrial and institutional work',
 } as const;
 
 /** The current-work sheet on the homepage: what is on site now. */
