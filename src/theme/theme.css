@@ -61,11 +61,6 @@ body {
   margin-inline: auto;
 }
 
-.muted {
-  margin-top: 1rem;
-  color: var(--ink-muted);
-}
-
 .small-print {
   margin-top: 2rem;
   font-size: 0.9rem;
@@ -1183,10 +1178,6 @@ main {
 /* ------------------------------------------------------- image notes + form */
 
 /* Keeps the shared image notes at a readable 12px. */
-.media-note {
-  font-size: 0.75rem;
-}
-
 .enquiry__intro {
   color: var(--ink-muted);
 }

@@ -597,10 +597,6 @@ const stampText = 'ISO 9001:2015 · Quality management system · ';
     margin-top: clamp(3rem, 6vw, 4.5rem);
   }
 
-  .cp-strip--four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   /* Two photographs side by side at full width, level and the same height. */
   .cp-strip--two {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -648,8 +644,7 @@ const stampText = 'ISO 9001:2015 · Quality management system · ';
   }
 
   @media (max-width: 52rem) {
-    .cp-strip,
-    .cp-strip--four {
+    .cp-strip {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 

@@ -164,23 +164,6 @@ textarea {
 
 /* ------------------------------------------------------------ image notes */
 
-/*
- * Marks photography borrowed from another project while a site awaits its own
- * images, so a stand-in is never mistaken for the project it sits on.
- */
-.media-note {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  padding: 0.3rem 0.7rem;
-  background: rgb(8 16 26 / 0.82);
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .notice {
   display: flex;
   gap: 0.7rem;
@@ -372,9 +355,6 @@ textarea {
 }
 
 /* Counting figures keep every digit the same width, so the line holds still. */
-.ledger__qty,
-.figure__value,
-.zero__value,
 [data-hm-count],
 [data-ab-count] {
   font-variant-numeric: tabular-nums;

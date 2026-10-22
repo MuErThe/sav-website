@@ -101,15 +101,6 @@ export const ledger = {
   rows: warehouse.items,
 } as const;
 
-export const record = {
-  title: 'Thirty years on site, and no accidents recorded',
-  timeline: [
-    { year: '1995', text: 'Founded in Indore as UPCL.' },
-    { year: '2025', text: 'Re-established as SAV Construction: the same company, team and yard as UPCL.' },
-    { year: 'Today', text: '70+ projects delivered for 100+ clients.' },
-  ],
-} as const;
-
 const PHARMA: Project['sector'] = 'Pharmaceutical';
 
 export const pharmaProjects = projects.filter((p) => p.sector === PHARMA);
@@ -140,25 +131,10 @@ export const why = {
   lede: 'Seven things set us apart on every site we run.',
 } as const;
 
-export const crew = {
-  title: 'Two meals a day, and Vishwakarma Pooja on the calendar',
-  lede: 'Our site teams are treated as extended family. We provide two meals a day, celebrate our festivals and national holidays together, and make time for the odd cricket match.',
-} as const;
-
 export const enquiry = {
   title: 'Tell us where, how big, and when you need to start.',
   lede: 'Share the location, approximate built-up area and your target timeline. We will come back to you with a considered response.',
 } as const;
-
-/** One line that says who SAV is, under the hero: work done, for whom, from where. */
-export const statement = `${stats[1]?.value ?? '70+'} projects for ${stats[3]?.value ?? '100+'} clients, built with formwork, scaffolding and plant from our own Indore yard.`;
-
-/** Why us, in three points, each backed by a fact in the data. */
-export const whyUsPoints = [
-  { id: 'safe', title: 'Safe', text: `${safety.headlineValue} accidents recorded across our major sites` },
-  { id: 'certified', title: 'Certified', text: 'ISO 9001:2015 quality management' },
-  { id: 'on-time', title: 'On time', text: 'Our own formwork, so your programme does not wait on a hire yard' },
-] as const;
 
 const bySlug = (...slugs: string[]): Project[] =>
   slugs.map((slug) => projects.find((p) => p.slug === slug)).filter((p): p is Project => p !== undefined);
