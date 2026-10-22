@@ -61,7 +61,7 @@ const pharmaNames = projects.filter((project) => project.sector === 'Pharmaceuti
 export const faqs: readonly Faq[] = [
   {
     question: 'Is SAV Construction the same company as UPCL?',
-    answer: `Yes. ${company.name} was established in ${company.established} as ${upcl.name} (${upcl.short}) and was re-established under its new name in ${company.reEstablished}. It works with the same team, staff, machinery and equipment, and is backed by ${upcl.short}.`,
+    answer: `Yes. ${company.name} was established in ${company.established} as ${upcl.name} (${upcl.short}) and was re-established under its new name in ${company.reEstablished}. Formerly ${upcl.short}, it works with the same team, staff, machinery and equipment.`,
   },
   {
     question: 'What does SAV Construction build?',

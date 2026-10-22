@@ -9,7 +9,6 @@ export const company = {
   legalName: 'Solid Assured Valued Construction Pvt. Ltd.',
   tagline: 'Solid · Assured · Valued',
   taglineWords: ['Solid', 'Assured', 'Valued'] as const,
-  backedBy: 'Backed by UPCL',
   established: 1995,
   reEstablished: 2025,
   description:
