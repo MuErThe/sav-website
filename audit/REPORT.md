@@ -177,3 +177,5 @@ Desktop stays 100 on performance for all four. Accessibility is 100 on all four,
 Trade-off, not resolved: bisecting by commit shows the home and gallery drop comes from self-hosting the fonts (pass 7) and, by about one point, from shipping scripts as files (pass 8). Same-origin fonts share the throttled connection with the main image. Preloading the main image recovered one point. Reverting the font pass would restore the old figures and bring back the Google Fonts dependency and the content security policy exceptions for it.
 
 Other figures: dist 485 → 497 files, image and HTML bytes down, 3 font files and 16 small script files added; source 10,517 → about 10,500 lines; npm audit 8 advisories → 0; axe zero critical or serious; no third-party hosts contacted.
+
+Decision, 22 October 2026: keep the self-hosted fonts. The home and gallery mobile scores (91 and 86) are accepted in exchange for no third-party font host and a content security policy with no font exceptions.
