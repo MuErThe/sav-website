@@ -2,7 +2,7 @@
 import { root } from '../lib/paths';
 import { Image } from 'astro:assets';
 import Layout from '../theme/Layout.astro';
-import { company, about, mission, vision, pillars, stats, whySav, culture } from '../data/company';
+import { company, about, mission, vision, pillars, stats, whySav, culture, quality, upcl } from '../data/company';
 import { cultureGallery } from '../lib/gallery';
 import { faqs } from '../data/seo';
 
@@ -24,7 +24,7 @@ const faqSchema = {
 
 <Layout
   title="About SAV Construction, formerly UPCL"
-  description="Established in 1995 as United Project Construction (UPCL) and re-established as SAV Construction in 2025: an ISO 9001:2015 industrial contractor in Indore."
+  description={`Established in ${company.established} as ${upcl.name.replace(' Ltd.', '')} (${upcl.short}) and re-established as ${company.name} in ${company.reEstablished}: an ${quality.standard} industrial contractor in Indore.`}
   schema={[faqSchema]}
 >
   <!-- 01 · The name, set large: what SAV stands for. -->

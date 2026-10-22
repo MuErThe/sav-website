@@ -1,7 +1,7 @@
 ---
 import Layout from '../theme/Layout.astro';
 import ContactForm from '../components/ContactForm.astro';
-import { contact, company } from '../data/company';
+import { contact, company, upcl } from '../data/company';
 import { enquiry } from '../data/story';
 
 /** A Google Maps search for an office address. */
@@ -16,7 +16,7 @@ const lines = [
 
 <Layout
   title="Contact SAV Construction, Indore"
-  description="Talk to SAV Construction, formerly UPCL, about an industrial or pharmaceutical project. Call +91 7970022422, email info@sav.construction, or send an enquiry."
+  description={`Talk to ${company.name}, formerly ${upcl.short}, about an industrial or pharmaceutical project. Call ${contact.phone}, email ${contact.email}, or send an enquiry.`}
 >
   <!-- 01 · The quickest routes first: phone and email, set as large as the page allows. -->
   <section class="ct-open" aria-labelledby="contact-title">

@@ -28,6 +28,21 @@ export const upcl = {
   formerly: 'Formerly',
 } as const;
 
+/**
+ * An office address, with the two display lines used on the site built from
+ * the same fields the structured data publishes. Both offices are in Indore.
+ */
+function office(label: string, street: string, postcode: string) {
+  return {
+    label,
+    street,
+    locality: 'Indore',
+    region: 'Madhya Pradesh',
+    postcode,
+    lines: [street, `Indore – ${postcode} (M.P.)`],
+  } as const;
+}
+
 export const contact = {
   phone: '+91 7970022422',
   phoneHref: 'tel:+917970022422',
@@ -35,14 +50,8 @@ export const contact = {
   emailHref: 'mailto:info@sav.construction',
   linkedin: 'https://www.linkedin.com/company/sav-construction-pvt-ltd/',
   offices: [
-    {
-      label: 'Registered office',
-      lines: ['63, Amitesh Nagar, Scheme no. 59', 'Indore – 452012 (M.P.)'],
-    },
-    {
-      label: 'Head office',
-      lines: ['79/2/3, Sukhniwas Gram, Cat Road', 'Indore – 452013 (M.P.)'],
-    },
+    office('Registered office', '63, Amitesh Nagar, Scheme no. 59', '452012'),
+    office('Head office', '79/2/3, Sukhniwas Gram, Cat Road', '452013'),
   ],
 } as const;
 
@@ -193,8 +202,12 @@ export const safety = {
   },
 } as const;
 
+/** From the ISO certificate held by the company. */
+const isoStandard = 'ISO 9001:2015';
+
 export const quality = {
-  certification: 'ISO 9001:2015 (Quality Management System) Certified Firm',
+  standard: isoStandard,
+  certification: `${isoStandard} (Quality Management System) Certified Firm`,
   policy:
     "Quality is paramount in SAV's operations, shaping every facet of our work. Our skilled and dedicated workforce is instrumental in upholding rigorous standards, serving as both subjects of quality control and catalysts for enhancing quality across our operations.",
   measures: [

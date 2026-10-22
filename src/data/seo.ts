@@ -7,7 +7,7 @@
  * keywords are adjusted in one place.
  */
 
-import { company, upcl, quality, warehouse } from './company';
+import { company, contact, upcl, quality, warehouse } from './company';
 import { projects } from './projects';
 
 /**
@@ -85,11 +85,11 @@ export const faqs: readonly Faq[] = [
   },
   {
     question: 'Is SAV Construction ISO certified?',
-    answer: `Yes. SAV Construction is an ${quality.certification.replace(' Certified Firm', '')} certified firm, and it keeps a zero-accident record across its major project sites.`,
+    answer: `Yes. SAV Construction is an ${quality.standard} (Quality Management System) certified firm, and it keeps a zero-accident record across its major project sites.`,
   },
   {
     question: 'How do I contact SAV Construction about a project?',
     answer:
-      'Call +91 7970022422, email info@sav.construction, or send an enquiry through the contact page at www.sav.construction/contact.',
+      `Call ${contact.phone}, email ${contact.email}, or send an enquiry through the contact page at www.sav.construction/contact.`,
   },
 ];

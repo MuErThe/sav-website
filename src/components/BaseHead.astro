@@ -44,6 +44,17 @@ const imageUrl = new URL(url(image), site).href;
 /** Preview builds stay out of search engines. */
 const preview = import.meta.env.PUBLIC_PREVIEW === 'true';
 
+/** Structured data addresses come from the same records as the footer. */
+const postal = (office: (typeof contact.offices)[number]) => ({
+  '@type': 'PostalAddress',
+  streetAddress: office.street,
+  addressLocality: office.locality,
+  addressRegion: office.region,
+  postalCode: office.postcode,
+  addressCountry: 'IN',
+});
+const headOffice = contact.offices.find((office) => office.label === 'Head office') ?? contact.offices[0];
+
 const organisationId = new URL('/#organization', site).href;
 const websiteId = new URL('/#website', site).href;
 
@@ -63,14 +74,8 @@ const graph = [
     foundingDate: String(company.established),
     telephone: contact.phone,
     email: contact.email,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: '79/2/3, Sukhniwas Gram, Cat Road',
-      addressLocality: 'Indore',
-      addressRegion: 'Madhya Pradesh',
-      postalCode: '452013',
-      addressCountry: 'IN',
-    },
+    address: postal(headOffice),
+    location: contact.offices.map((office) => ({ '@type': 'Place', name: office.label, address: postal(office) })),
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'sales',
