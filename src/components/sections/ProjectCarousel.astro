@@ -45,10 +45,10 @@ const sizes =
     role={many ? 'region' : undefined}
     aria-label={many ? `${label}, scroll sideways for more` : undefined}
   >
-    <ul class="pc__track" role="list">
+    <div class="pc__track">
       {
         images.map((image, i) => (
-          <li class="pc__slide" data-caption={image.caption} role="group" aria-roledescription="slide" aria-label={`Photo ${i + 1} of ${total}`}>
+          <div class="pc__slide" data-caption={image.caption} role="group" aria-roledescription="slide" aria-label={`Photo ${i + 1} of ${total}`}>
             <Image
               src={image.src}
               alt={image.alt}
@@ -58,10 +58,10 @@ const sizes =
               decoding="async"
               class="pc__image"
             />
-          </li>
+          </div>
         ))
       }
-    </ul>
+    </div>
   </div>
 
   {
@@ -346,11 +346,9 @@ const sizes =
     const fill = root.querySelector<HTMLElement>('[data-pc-fill]');
     let index = 0;
 
-    // The buttons take over from the scrollable strip as the keyboard route.
+    // The buttons join the strip as a second keyboard route; the strip stays
+    // focusable so its scroll area is reachable, and arrow keys move it.
     controls.hidden = false;
-    viewport.removeAttribute('tabindex');
-    viewport.removeAttribute('role');
-    viewport.removeAttribute('aria-label');
     root.dataset.pcReady = '';
 
     const show = (i: number, announce: boolean) => {

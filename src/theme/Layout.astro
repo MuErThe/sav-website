@@ -21,9 +21,10 @@ interface Props {
   imageAlt?: string;
   type?: 'website' | 'article';
   schema?: readonly Record<string, unknown>[];
+  noindex?: boolean;
 }
 
-const { title, description, fullTitle, image, imageAlt, type, schema } = Astro.props;
+const { title, description, fullTitle, image, imageAlt, type, schema, noindex } = Astro.props;
 const nav = navFor();
 const path = Astro.url.pathname;
 const year = new Date().getFullYear();
@@ -45,6 +46,7 @@ const fontHref =
       imageAlt={imageAlt}
       type={type}
       schema={schema}
+      noindex={noindex}
       fontHref={fontHref}
       themeColor="#f3f5f8"
     />

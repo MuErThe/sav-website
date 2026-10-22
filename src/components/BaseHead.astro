@@ -17,6 +17,8 @@ interface Props {
   type?: 'website' | 'article';
   /** Extra schema.org nodes for this page, joined to the site-wide graph. */
   schema?: readonly Record<string, unknown>[];
+  /** Keeps a page out of search results, e.g. the 404 page. */
+  noindex?: boolean;
   /** Google Fonts stylesheet URL for the active theme. */
   fontHref?: string;
   /** Browser UI colour; each theme passes its own page background. */
@@ -31,6 +33,7 @@ const {
   imageAlt = `${company.name}, formerly UPCL: industrial and pharmaceutical construction in Indore`,
   type = 'website',
   schema = [],
+  noindex = false,
   fontHref,
   themeColor = '#08509f',
 } = Astro.props;
@@ -102,7 +105,7 @@ const graph = [
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
 {
-  preview ? (
+  preview || noindex ? (
     <meta name="robots" content="noindex, nofollow" />
   ) : (
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />

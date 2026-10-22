@@ -1,0 +1,45 @@
+---
+/**
+ * Not-found page, served by the host for any unknown address with a 404
+ * status. Kept out of search results and the sitemap.
+ */
+import { root } from '../lib/paths';
+import Layout from '../theme/Layout.astro';
+import ChapterHead from '../components/ChapterHead.astro';
+import { contact } from '../data/company';
+---
+
+<Layout
+  title="Page not found"
+  description="This page does not exist. Go to the SAV Construction home page, see our projects, or contact us."
+  noindex
+>
+  <section class="chapter" aria-labelledby="not-found-title">
+    <div class="shell">
+      <ChapterHead
+        number="404"
+        title="Page not found"
+        id="not-found-title"
+        lede="This page has moved or no longer exists. Check the address, or use one of the links below."
+        level={1}
+      />
+      <p class="nf-actions">
+        <a class="btn btn--primary" href={`${root}/`}>Go to the home page</a>
+        <a class="btn btn--ghost" href={`${root}/projects/`}>See our projects</a>
+      </p>
+      <p class="small-print">
+        Looking for something specific? Call <a href={contact.phoneHref}>{contact.phone}</a> or email
+        <a href={contact.emailHref}>{contact.email}</a>.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .nf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+</style>
