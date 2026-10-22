@@ -21,6 +21,8 @@ interface Props {
   noindex?: boolean;
   /** Font files to preload, as built URLs. */
   preloadFonts?: readonly string[];
+  /** The page's largest image, fetched ahead of fonts and scripts. */
+  preloadImage?: string;
   /** Browser UI colour; the layout passes its page background. */
   themeColor?: string;
 }
@@ -35,6 +37,7 @@ const {
   schema = [],
   noindex = false,
   preloadFonts = [],
+  preloadImage,
   themeColor = '#08509f',
 } = Astro.props;
 
@@ -144,6 +147,7 @@ const graph = [
 <link rel="alternate" type="text/plain" title="LLM summary" href={url('/llms.txt')} />
 <meta name="theme-color" content={themeColor} />
 
+{preloadImage && <link rel="preload" href={preloadImage} as="image" fetchpriority="high" />}
 {preloadFonts.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
 
 <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })} />

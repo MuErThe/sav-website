@@ -13,3 +13,4 @@ audit/package-lock.json
 audit/baseline/
 audit/pass*/
 audit/after/
+audit/*.log

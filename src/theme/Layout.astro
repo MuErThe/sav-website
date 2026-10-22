@@ -3,7 +3,7 @@
  * Page shell for every route: head (via BaseHead), top bar, header with the
  * collapsible mobile menu, main content slot, footer, and the shared reveal.
  * Props: title, description, fullTitle, image, imageAlt, type, schema,
- * noindex (all passed straight to BaseHead). Used by every page.
+ * noindex, preloadImage (all passed straight to BaseHead). Used by every page.
  */
 import { root } from '../lib/paths';
 import { Image } from 'astro:assets';
@@ -31,9 +31,10 @@ interface Props {
   type?: 'website' | 'article';
   schema?: readonly Record<string, unknown>[];
   noindex?: boolean;
+  preloadImage?: string;
 }
 
-const { title, description, fullTitle, image, imageAlt, type, schema, noindex } = Astro.props;
+const { title, description, fullTitle, image, imageAlt, type, schema, noindex, preloadImage } = Astro.props;
 const nav = navFor();
 const path = Astro.url.pathname;
 const year = new Date().getFullYear();
@@ -56,6 +57,7 @@ const preloadFonts = [displayFont, bodyFont];
       type={type}
       schema={schema}
       noindex={noindex}
+      preloadImage={preloadImage}
       preloadFonts={preloadFonts}
       themeColor="#f3f5f8"
     />

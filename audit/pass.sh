@@ -11,11 +11,11 @@ cd "$root"
 npm run build > "$out/build.log" 2>&1 || { echo BUILD FAILED; tail -20 "$out/build.log"; exit 2; }
 npm run check > "$out/check.log" 2>&1 || { echo CHECK FAILED; tail -20 "$out/check.log"; exit 2; }
 grep -E "Result|errors|warnings" "$out/check.log" | tail -3
-npx astro preview --port 4325 > "$out/preview.log" 2>&1 &
+node "$here/cspserve.mjs" dist vercel.json > "$out/serve.log" 2>&1 &
 pid=$!
 trap "kill $pid 2>/dev/null || true" EXIT
-until curl -s -o /dev/null http://localhost:4325/; do sleep 0.3; done
+until curl -s -o /dev/null http://localhost:4327/; do sleep 0.3; done
 cd "$here"
-node crawl.mjs http://localhost:4325 "$out/local" > "$out/crawl.log" 2>&1
-[ $shots = 1 ] && node shots.mjs http://localhost:4325 "$out/shots" > "$out/shots.log" 2>&1
+node crawl.mjs http://localhost:4327 "$out/local" > "$out/crawl.log" 2>&1
+[ $shots = 1 ] && node shots.mjs http://localhost:4327 "$out/shots" > "$out/shots.log" 2>&1
 node verify.mjs baseline "$out" "$@"

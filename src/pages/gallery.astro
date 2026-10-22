@@ -71,6 +71,7 @@ const total = photos.length;
                       widths={[360, Math.min(720, photo.src.width)]}
                       sizes="(max-width: 40rem) calc(100vw - 2.5rem), (max-width: 64rem) 45vw, 22rem"
                       loading={i < 6 ? 'eager' : 'lazy'}
+                      fetchpriority={i === 0 ? 'high' : undefined}
                     />
                     <span class="gl-item__caption" aria-hidden="true">
                       <strong>{photo.caption}</strong>

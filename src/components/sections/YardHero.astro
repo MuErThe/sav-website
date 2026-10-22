@@ -10,11 +10,10 @@
  * adds autoplay, which never starts for people who ask for reduced motion and
  * always has a pause control; the clip only plays while it is the slide shown.
  */
-import { Image, getImage } from 'astro:assets';
-import { hero, heroRotation, heroSlides, heroVideo } from '../../data/story';
+import { Image } from 'astro:assets';
+import { hero, heroRotation, heroVideo } from '../../data/story';
 import { company } from '../../data/company';
-import { projectBySlug } from '../../data/projects';
-import { galleryFor } from '../../lib/gallery';
+import { heroPhotos, heroPoster } from '../../lib/hero';
 import { url } from '../../lib/paths';
 
 interface Props {
@@ -26,13 +25,7 @@ const words = (text: string) => text.split(' ');
 const lead = words(hero.titleLead);
 const rest = words(heroRotation.rest);
 
-const photos = heroSlides.flatMap(({ slug, caption, focus }) => {
-  const project = projectBySlug(slug);
-  const photo = galleryFor(slug).find((image) => image.caption === caption);
-  return project && photo ? [{ project, photo, focus }] : [];
-});
-
-const poster = photos[0] ? await getImage({ src: photos[0].photo.src, width: 1600 }) : undefined;
+const photos = heroPhotos;
 const total = photos.length + (heroVideo ? 1 : 0);
 ---
 
@@ -65,7 +58,7 @@ const total = photos.length + (heroVideo ? 1 : 0);
             heroVideo && (
               <li class="hm-show__slide" aria-roledescription="slide" aria-label={`1 of ${total}`}>
                 <figure>
-                  <video muted loop playsinline preload="metadata" poster={poster?.src} data-hm-video>
+                  <video muted loop playsinline preload="metadata" poster={heroPoster} data-hm-video>
                     <source src={url(heroVideo.src)} type="video/mp4" />
                   </video>
                 </figure>

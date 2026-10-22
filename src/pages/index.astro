@@ -13,12 +13,15 @@ import PharmaWork from '../components/sections/PharmaWork.astro';
 import YardLedger from '../components/sections/YardLedger.astro';
 import Enquiry from '../components/sections/Enquiry.astro';
 import { company, quality, upcl } from '../data/company';
+import { heroVideo } from '../data/story';
+import { heroPoster } from '../lib/hero';
 
 const base = `${root}`;
 ---
 
 <Layout
   title={company.name}
+  preloadImage={heroVideo ? heroPoster : undefined}
   fullTitle={`${company.name}, formerly UPCL | Industrial contractor, Indore`}
   description={`${company.name}, formerly ${upcl.short}, builds pharmaceutical plants, industrial sheds and factories in Indore, Pithampur and across India. ${quality.standard}, since ${company.established}.`}
 >

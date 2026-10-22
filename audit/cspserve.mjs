@@ -1,7 +1,7 @@
 /**
  * Serves dist/ with the headers from vercel.json applied, to test the
  * content security policy locally.
- *   node cspserve.mjs <dist-dir> <vercel.json>   (listens on 4327)
+ *   node cspserve.mjs <dist-dir> <vercel.json> [port]   (default 4327)
  */
 import http from 'node:http'; import { readFile, stat } from 'node:fs/promises'; import { extname, join } from 'node:path';
 const root = process.argv[2]; const conf = JSON.parse(await readFile(process.argv[3], 'utf8'));
@@ -11,4 +11,4 @@ http.createServer(async (req, res) => {
   try { if ((await stat(f)).isDirectory()) f = join(f, 'index.html'); } catch { f = join(root, '404.html'); res.statusCode = 404; }
   for (const rule of conf.headers) if (new RegExp('^' + rule.source.replace('(.*)', '.*') + '$').test(p)) for (const h of rule.headers) res.setHeader(h.key, h.value.replace('; upgrade-insecure-requests', ''));
   try { const body = await readFile(f); res.setHeader('Content-Type', types[extname(f)] ?? 'application/octet-stream'); res.end(body); } catch { res.statusCode = 404; res.end(); }
-}).listen(4327);
+}).listen(Number(process.argv[4] ?? 4327));
