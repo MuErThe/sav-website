@@ -152,14 +152,14 @@ Every pass was rebuilt, type-checked, crawled and screenshotted at four widths, 
 | 1 | `b734fda` | Removed 2 dead images, the duplicate `assets/` originals, 4 dead exports, dead reveal selectors and counter, 3 unused CSS rules | −128 lines, clean |
 | 2 | `aa50653` | Client logos sized to their 56 px rendered height | Home images 408 → 380 KB, capabilities 521 → 456 KB, clean. Hero video re-encodes (H.264, VP9, AV1) gave no worthwhile saving; video unchanged |
 | 3 | `7853b05` | 404 page (noindex); carousel roles; carousel strip stays keyboard-focusable | axe: zero critical or serious on every route |
-| 4a | — | One `src/lib/motion.ts` for reveal, count-up and scroll progress (5 observer copies, 2 counters, 2 progress loops) | All 125 reveal targets and 7 counters complete with motion on |
+| 4a | `f83588b` | One `src/lib/motion.ts` for reveal, count-up and scroll progress (5 observer copies, 2 counters, 2 progress loops) | All 125 reveal targets and 7 counters complete with motion on |
 | 4b | `2498460` | `Arrow.astro` for six footer copies | Clean |
 | 5 | `722b933` | Office addresses and ISO standard stored once; both offices in structured data | Only the intended structured-data addition |
 | 6 | `73af8b0` | Header comments, fact sources, more unread data removed, stale comments, README | Clean |
 | 7 | `1339dd5` | Self-hosted fonts, preloaded | No third-party requests; see trade-off below |
 | 8 | `7b4a0e6` | `vercel.json` security headers; scripts always as files | No policy violations on any route |
 | 9 | `84fdecc` | Astro 5.18 → 7.4, sharp 0.35; `compressHTML: true` keeps inline spacing | npm audit 8 → 0 advisories |
-| 10 | (this commit) | Hero poster preloaded with high priority; first gallery photo high priority | Home mobile +1 point |
+| 10 | `cfe0206` | Hero poster preloaded with high priority; first gallery photo high priority | Home mobile +1 point |
 
 ## 9. Before and after
 
