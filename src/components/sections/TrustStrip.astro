@@ -25,7 +25,7 @@ const logos = trust.clientFiles
         {
           logos.map(({ client, logo }) => (
             <li class="hm-trust__logo">
-              <Image src={logo!} alt={client!.name} densities={[1, 2]} loading="lazy" />
+              <Image src={logo!} alt={client!.name} height={56} densities={[1, 2]} loading="lazy" />
             </li>
           ))
         }
@@ -34,7 +34,7 @@ const logos = trust.clientFiles
         {
           logos.map(({ logo }) => (
             <li class="hm-trust__logo">
-              <Image src={logo!} alt="" densities={[1, 2]} loading="lazy" />
+              <Image src={logo!} alt="" height={56} densities={[1, 2]} loading="lazy" />
             </li>
           ))
         }

@@ -286,14 +286,14 @@ const stampText = 'ISO 9001:2015 · Quality management system · ';
             <ul class="cp-logos__set" role="list">
               {row.map(({ client, logo }) => (
                 <li class="cp-logos__cell">
-                  <Image src={logo} alt={client.name} densities={[1, 2]} loading="lazy" />
+                  <Image src={logo} alt={client.name} height={56} densities={[1, 2]} loading="lazy" />
                 </li>
               ))}
             </ul>
             <ul class="cp-logos__set cp-logos__set--copy" role="list" aria-hidden="true">
               {row.map(({ logo }) => (
                 <li class="cp-logos__cell">
-                  <Image src={logo} alt="" densities={[1, 2]} loading="lazy" />
+                  <Image src={logo} alt="" height={56} densities={[1, 2]} loading="lazy" />
                 </li>
               ))}
             </ul>
