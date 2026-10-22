@@ -20,6 +20,8 @@ for (const route of routes) {
   await new Promise((r) => setTimeout(r, 400));
   const csp = res.headers()['content-security-policy'] ? 'csp' : 'NO CSP HEADER';
   const motion = await p.evaluate(() => document.documentElement.className);
+  // The not-found route is meant to answer 404; that is not a fault.
+  if (route === '/no-such-page/') errors.splice(0, errors.length, ...errors.filter((e) => !e.includes('status of 404')));
   if (errors.length || csp !== 'csp') { n++; console.log(route, csp, errors); }
   else console.log(route, 'ok', `(scripts ran: ${motion || 'n/a'})`);
   await p.close();

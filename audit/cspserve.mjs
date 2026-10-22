@@ -3,7 +3,6 @@
  * content security policy locally.
  *   node cspserve.mjs <dist-dir> <vercel.json>   (listens on 4327)
  */
-// Serves dist/ with the vercel.json headers applied, to test the policy.
 import http from 'node:http'; import { readFile, stat } from 'node:fs/promises'; import { extname, join } from 'node:path';
 const root = process.argv[2]; const conf = JSON.parse(await readFile(process.argv[3], 'utf8'));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.mp4': 'video/mp4', '.xml': 'application/xml', '.txt': 'text/plain', '.webmanifest': 'application/manifest+json' };

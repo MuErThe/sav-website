@@ -10,6 +10,8 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   // The dev toolbar overlays the page during review; it never ships to production.
   devToolbar: { enabled: false },
+  // Keep spaces between inline elements, as written ("marked *", "01 / 07").
+  compressHTML: true,
   build: { inlineStylesheets: 'auto' },
   // Every script ships as a file, never inline, so the content security
   // policy in vercel.json can allow scripts from this site alone.
