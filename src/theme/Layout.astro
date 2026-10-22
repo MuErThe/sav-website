@@ -7,6 +7,7 @@ import savLogo from '../assets/brand/sav-logo.png';
 import savLogoWhite from '../assets/brand/sav-logo-white.png';
 import UpclMark from '../components/UpclMark.astro';
 import BrandLockup from '../components/BrandLockup.astro';
+import Arrow from '../components/Arrow.astro';
 import { company, contact } from '../data/company';
 import { navFor, isCurrent } from '../lib/nav';
 import { featuredProjects } from '../data/projects';
@@ -128,7 +129,7 @@ const fontHref =
                   <li>
                     <a class="footer__link" href={item.href}>
                       <span class="footer__link-text">{item.label}</span>
-                      <svg class="footer__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                      <Arrow class="footer__arrow" />
                     </a>
                   </li>
                 ))
@@ -144,7 +145,7 @@ const fontHref =
                   <li>
                     <a class="footer__link" href={`${root}/projects/${project.slug}/`}>
                       <span class="footer__link-text">{project.name}</span>
-                      <svg class="footer__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                      <Arrow class="footer__arrow" />
                     </a>
                   </li>
                 ))
@@ -161,7 +162,7 @@ const fontHref =
                 </svg>
                 <a class="footer__link" href={contact.phoneHref}>
                   <span class="footer__link-text">{contact.phone}</span>
-                  <svg class="footer__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                  <Arrow class="footer__arrow" />
                 </a>
               </li>
               <li>
@@ -170,7 +171,7 @@ const fontHref =
                 </svg>
                 <a class="footer__link" href={contact.emailHref}>
                   <span class="footer__link-text">{contact.email}</span>
-                  <svg class="footer__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                  <Arrow class="footer__arrow" />
                 </a>
               </li>
               <li>
@@ -179,7 +180,7 @@ const fontHref =
                 </svg>
                 <a class="footer__link" href={contact.linkedin} target="_blank" rel="noopener noreferrer">
                   <span class="footer__link-text">LinkedIn</span>
-                  <svg class="footer__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                  <Arrow class="footer__arrow" />
                   <span class="visually-hidden"> (opens in a new tab)</span>
                 </a>
               </li>
@@ -202,7 +203,7 @@ const fontHref =
                       <span>
                         <span class="footer__label">{office.label}</span>
                         <span class="footer__link-text">{office.lines.join(', ')}</span>
-                        <svg class="footer__arrow footer__arrow--inline" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
+                        <Arrow class="footer__arrow footer__arrow--inline" />
                         <span class="visually-hidden"> (opens Google Maps in a new tab)</span>
                       </span>
                     </a>

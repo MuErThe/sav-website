@@ -1,0 +1,14 @@
+---
+/**
+ * Small diagonal arrow beside footer links. Decorative, hidden from
+ * assistive technology. Used in the footer of theme/Layout.astro.
+ *
+ * Props: class (string), styled globally in theme.css.
+ */
+interface Props {
+  class: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 9 9 3 M4.5 3H9v4.5"></path></svg>
