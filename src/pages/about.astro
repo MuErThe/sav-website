@@ -195,77 +195,22 @@ const faqSchema = {
 </Layout>
 
 <script>
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Blocks settle in as they enter; figures count up once; photos drift with scroll.
+  import { countUp, motionAllowed, reveal, scrollProgress } from '../lib/motion';
 
-  if (!calm.matches && 'IntersectionObserver' in window) {
+  if (motionAllowed()) {
     document.documentElement.classList.add('ab-motion');
 
-    // Blocks settle in as they enter; figures count up once.
-    const countUp = (el: HTMLElement) => {
-      const final = el.textContent ?? '';
-      const match = /^([^\d]*)(\d+)(.*)$/.exec(final.trim());
-      if (!match) return;
-      const [, before = '', digits = '0', after = ''] = match;
-      const target = Number(digits);
-      const shown = document.createElement('span');
-      shown.setAttribute('aria-hidden', 'true');
-      const spoken = document.createElement('span');
-      spoken.className = 'visually-hidden';
-      spoken.textContent = final;
-      el.replaceChildren(shown, spoken);
-      const start = performance.now();
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - start) / 1400);
-        shown.textContent = `${before}${Math.round(target * (1 - Math.pow(1 - t, 3)))}${after}`;
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
+    reveal(document.querySelectorAll('[data-ab]'), {
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.15,
+      onIn: (el) => el.querySelectorAll<HTMLElement>('[data-ab-count]').forEach((figure) => countUp(figure)?.()),
+    });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target as HTMLElement;
-          el.classList.add('is-in');
-          el.querySelectorAll<HTMLElement>('[data-ab-count]').forEach(countUp);
-          observer.unobserve(el);
-        });
-      },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.15 },
+    scrollProgress(
+      Array.from(document.querySelectorAll<HTMLElement>('[data-ab-progress]')),
+      (rect, vh) => (vh - rect.top) / (vh * 0.6 + rect.height * 0.4),
     );
-    document.querySelectorAll('[data-ab]').forEach((el) => observer.observe(el));
-
-    // Scroll progress drives the photo drift; nothing moves the page itself.
-    // --p eases toward the scroll position rather than jumping to it, so a
-    // stepped mouse wheel still reads as one glide.
-    const tracked = Array.from(document.querySelectorAll<HTMLElement>('[data-ab-progress]'));
-    const shown = tracked.map(() => -1);
-    let queued = false;
-    const update = () => {
-      queued = false;
-      const vh = window.innerHeight;
-      let settling = false;
-      tracked.forEach((section, i) => {
-        const r = section.getBoundingClientRect();
-        const target = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.6 + r.height * 0.4)));
-        const from = shown[i]!;
-        const next = from < 0 || Math.abs(target - from) < 0.001 ? target : from + (target - from) * 0.14;
-        if (next !== target) settling = true;
-        if (next !== from) section.style.setProperty('--p', next.toFixed(4));
-        shown[i] = next;
-      });
-      if (settling) request();
-    };
-    const request = () => {
-      if (!queued) {
-        queued = true;
-        requestAnimationFrame(update);
-      }
-    };
-    window.addEventListener('scroll', request, { passive: true });
-    window.addEventListener('resize', request);
-    update();
   }
 </script>
 

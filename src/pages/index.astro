@@ -32,93 +32,29 @@ const base = `${root}`;
    * Homepage motion. Nothing is hidden until this runs and the visitor allows
    * motion, so every section reads the same without it.
    */
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const moving = !calm.matches && 'IntersectionObserver' in window;
-  const root = document.documentElement;
+  import { countUp, motionAllowed, reveal, scrollProgress } from '../lib/motion';
 
-  /** Counts "30+" up from 0; the final text stays for screen readers. */
-  function countUp(el: HTMLElement): void {
-    const final = el.textContent?.trim() ?? '';
-    const match = /^(\D*)(\d+)(.*)$/.exec(final);
-    if (!match || Number(match[2]) === 0) return;
-    const [, before, digits, after] = match;
-    const target = Number(digits);
+  if (motionAllowed()) {
+    document.documentElement.classList.add('hm-motion');
 
-    const shown = document.createElement('span');
-    shown.setAttribute('aria-hidden', 'true');
-    shown.textContent = `${before}0${after}`;
-    const spoken = document.createElement('span');
-    spoken.className = 'visually-hidden';
-    spoken.textContent = final;
-    el.replaceChildren(shown, spoken);
+    // Figures count up once their block arrives.
+    const starters = new Map<Element, () => void>();
+    document.querySelectorAll<HTMLElement>('[data-hm-count]').forEach((el) => {
+      const start = countUp(el);
+      if (start) starters.set(el, start);
+    });
 
-    el.addEventListener(
-      'hm:in',
-      () => {
-        const start = performance.now();
-        const tick = (now: number) => {
-          const t = Math.min(1, (now - start) / 1400);
-          shown.textContent = `${before}${Math.round(target * (1 - Math.pow(1 - t, 3)))}${after}`;
-          if (t < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+    reveal(document.querySelectorAll('[data-hm]'), {
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.15,
+      stagger: '--i',
+      onIn: (el) => {
+        const figure = el.querySelector('[data-hm-count]');
+        if (figure) starters.get(figure)?.();
       },
-      { once: true },
-    );
-  }
+    });
 
-  if (moving) {
-    root.classList.add('hm-motion');
-
-    document.querySelectorAll<HTMLElement>('[data-hm-count]').forEach(countUp);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Stagger only what arrives together, so an item low in a list
-        // never waits on its place in it.
-        entries
-          .filter((entry) => entry.isIntersecting)
-          .forEach((entry, order) => {
-            const el = entry.target as HTMLElement;
-            el.style.setProperty('--i', String(Math.min(order, 6)));
-            el.classList.add('is-in');
-            el.querySelector('[data-hm-count]')?.dispatchEvent(new Event('hm:in'));
-            observer.unobserve(el);
-          });
-      },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.15 },
-    );
-    document.querySelectorAll('[data-hm]').forEach((el) => observer.observe(el));
-
-    // Sections that move with scroll get --p: 0 as they enter, 1 once settled.
-    // --p eases toward the scroll position rather than jumping to it, so a
-    // stepped mouse wheel still reads as one glide. The page itself scrolls
-    // natively; only --p is smoothed.
-    const tracked = Array.from(document.querySelectorAll<HTMLElement>('[data-hm-progress]'));
-    const shown = tracked.map(() => -1);
-    let queued = false;
-    const update = () => {
-      queued = false;
-      const h = window.innerHeight;
-      let settling = false;
-      tracked.forEach((el, i) => {
-        const top = el.getBoundingClientRect().top;
-        const target = Math.min(1, Math.max(0, (h - top) / (h * 0.8)));
-        const from = shown[i]!;
-        const next = from < 0 || Math.abs(target - from) < 0.001 ? target : from + (target - from) * 0.14;
-        if (next !== target) settling = true;
-        if (next !== from) el.style.setProperty('--p', next.toFixed(4));
-        shown[i] = next;
-      });
-      if (settling) request();
-    };
-    const request = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(update);
-    };
-    window.addEventListener('scroll', request, { passive: true });
-    window.addEventListener('resize', request);
-    update();
+    // Sections that move with scroll: 0 as they enter, 1 once settled.
+    scrollProgress(Array.from(document.querySelectorAll<HTMLElement>('[data-hm-progress]')), (rect, vh) => (vh - rect.top) / (vh * 0.8));
   }
 </script>

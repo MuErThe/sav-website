@@ -11,34 +11,14 @@
 ---
 
 <script>
+  import { motionAllowed, reveal } from '../lib/motion';
+
   const REVEAL = ['.chapter__head', '.record', '.zero', '.person', '.call', '.board', '.ply-edge'].join(',');
 
-  function start(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
-
+  if (motionAllowed()) {
     document.documentElement.classList.add('motion');
-
-    const targets = Array.from(document.querySelectorAll<HTMLElement>(REVEAL));
+    const targets = document.querySelectorAll(REVEAL);
     targets.forEach((el) => el.classList.add('reveal'));
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Stagger only what arrives together, capped so long lists stay brisk;
-        // an item further down a list never waits on its place in it.
-        entries
-          .filter((entry) => entry.isIntersecting)
-          .forEach((entry, order) => {
-            const el = entry.target as HTMLElement;
-            el.style.setProperty('--reveal-i', String(Math.min(order, 6)));
-            el.classList.add('is-in');
-            observer.unobserve(el);
-          });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
-    );
-
-    targets.forEach((el) => observer.observe(el));
+    reveal(targets, { rootMargin: '0px 0px -8% 0px', threshold: 0.12, stagger: '--reveal-i' });
   }
-
-  start();
 </script>

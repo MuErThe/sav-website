@@ -391,21 +391,10 @@ const lines = [
 
 <script>
   // Nothing is hidden until this runs and the visitor allows motion.
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  import { motionAllowed, reveal } from '../lib/motion';
 
-  if (!calm.matches && 'IntersectionObserver' in window) {
+  if (motionAllowed()) {
     document.documentElement.classList.add('ct-motion');
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-in');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.1 },
-    );
-    document.querySelectorAll('[data-ct]').forEach((el) => observer.observe(el));
+    reveal(document.querySelectorAll('[data-ct]'), { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
   }
 </script>

@@ -305,22 +305,12 @@ const stampText = 'ISO 9001:2015 · Quality management system · ';
 </Layout>
 
 <script>
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Nothing is hidden until this runs and the visitor allows motion.
+  import { motionAllowed, reveal } from '../lib/motion';
 
-  if (!calm.matches && 'IntersectionObserver' in window) {
+  if (motionAllowed()) {
     document.documentElement.classList.add('cp-motion');
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-in');
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.15 },
-    );
-    document.querySelectorAll('[data-cp]').forEach((el) => observer.observe(el));
+    reveal(document.querySelectorAll('[data-cp]'), { rootMargin: '0px 0px -8% 0px', threshold: 0.15 });
   }
 </script>
 
