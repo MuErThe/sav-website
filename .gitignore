@@ -7,3 +7,9 @@ dist/
 .DS_Store
 PROJECT_CONTEXT.md
 .vercel/
+# Audit harness output and its own tools; the scripts and report are kept.
+audit/node_modules/
+audit/package-lock.json
+audit/baseline/
+audit/pass*/
+audit/after/
