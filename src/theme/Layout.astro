@@ -14,7 +14,7 @@ import savLogoWhite from '../assets/brand/sav-logo-white.png';
 import UpclMark from '../components/UpclMark.astro';
 import BrandLockup from '../components/BrandLockup.astro';
 import Arrow from '../components/Arrow.astro';
-import { company, contact } from '../data/company';
+import { company, contact, upcl } from '../data/company';
 import { navFor, isCurrent } from '../lib/nav';
 import { featuredProjects } from '../data/projects';
 import displayFont from '../assets/fonts/big-shoulders-display-latin.woff2?url';
@@ -127,7 +127,7 @@ const preloadFonts = [displayFont, bodyFont];
             </a>
             <p class="footer__note footer__stack">
               <span>{company.legalName}</span>
-              <span class="footer__upcl"><UpclMark class="footer__mark" />{company.backedBy}</span>
+              <span class="footer__upcl"><UpclMark class="footer__mark" />{upcl.formerly} {upcl.short}</span>
             </p>
           </div>
 
