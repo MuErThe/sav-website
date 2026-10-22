@@ -19,8 +19,8 @@ interface Props {
   schema?: readonly Record<string, unknown>[];
   /** Keeps a page out of search results, e.g. the 404 page. */
   noindex?: boolean;
-  /** Google Fonts stylesheet URL for the active theme. */
-  fontHref?: string;
+  /** Font files to preload, as built URLs. */
+  preloadFonts?: readonly string[];
   /** Browser UI colour; the layout passes its page background. */
   themeColor?: string;
 }
@@ -34,7 +34,7 @@ const {
   type = 'website',
   schema = [],
   noindex = false,
-  fontHref,
+  preloadFonts = [],
   themeColor = '#08509f',
 } = Astro.props;
 
@@ -144,14 +144,6 @@ const graph = [
 <link rel="alternate" type="text/plain" title="LLM summary" href={url('/llms.txt')} />
 <meta name="theme-color" content={themeColor} />
 
-{
-  fontHref && (
-    <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link rel="stylesheet" href={fontHref} />
-    </>
-  )
-}
+{preloadFonts.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
 
 <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })} />
