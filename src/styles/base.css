@@ -314,6 +314,26 @@ textarea {
   font-weight: 500;
 }
 
+.enquiry__fallback {
+  margin-top: 1rem;
+  color: var(--ink-muted);
+}
+
+.enquiry__fallback p {
+  margin-bottom: 0.75rem;
+}
+
+.enquiry__copy {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid currentColor;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .enquiry__status[data-kind='error'] {
   border-left-color: #a4161a;
   background: #fdf2f2;

@@ -42,8 +42,11 @@ A project with no photographs borrows a related one, marked as representative.
 
 ## Contact form
 
-The form posts to the address in `PUBLIC_CONTACT_ENDPOINT` (see `.env.example`). Until
-that is set, it tells visitors the message was not sent and gives the phone and email.
+Until `PUBLIC_CONTACT_ENDPOINT` is set (see `.env.example`), the form opens the visitor's
+own email app with the enquiry written out to info@sav.construction, and they press send.
+For devices with no email app it then shows the address and a button that copies the
+message. Once a sending service is in place, set the variable and the form sends in the
+background instead.
 
 ## Checking a change
 

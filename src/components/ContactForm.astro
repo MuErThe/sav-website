@@ -4,10 +4,12 @@ import { contact } from '../data/company';
 /**
  * Contact form, styled by the site theme.
  *
- * The endpoint comes from PUBLIC_CONTACT_ENDPOINT so nothing is hardcoded.
- * Without JavaScript the form posts directly to that endpoint; with it, the
- * submission is validated inline and sent with fetch so the user keeps what
- * they typed whatever happens.
+ * With PUBLIC_CONTACT_ENDPOINT set, a valid enquiry is sent there with fetch.
+ * Without it, the enquiry opens in the visitor's own email app, addressed to
+ * the company with every field written out, and they press send. A fallback
+ * then offers the address and a copy of the message, for devices with no
+ * email app. Validation is inline, and the visitor keeps what they typed
+ * whatever happens.
  */
 const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT ?? '';
 
@@ -28,7 +30,6 @@ const enquiryTypes = [
   novalidate
   data-endpoint={endpoint}
   data-fallback-email={contact.email}
-  data-fallback-phone={contact.phone}
   aria-describedby="enquiry-intro"
 >
   <p id="enquiry-intro" class="enquiry__intro">
@@ -131,6 +132,15 @@ const enquiryTypes = [
 
   <!-- Single live region for form-level status, so it is announced once. -->
   <div class="enquiry__status" role="status" aria-live="polite" data-form-status hidden></div>
+
+  <!-- Shown after the email app is opened, for anyone whose device has none. -->
+  <div class="enquiry__fallback" data-form-fallback hidden>
+    <p>
+      No email app opened? Email <a href={contact.emailHref}>{contact.email}</a> and paste your message,
+      or call <a href={contact.phoneHref}>{contact.phone}</a>.
+    </p>
+    <button type="button" class="enquiry__copy" data-form-copy>Copy my message</button>
+  </div>
 </form>
 
 <script>
@@ -173,9 +183,54 @@ const enquiryTypes = [
     const submit = form.querySelector<HTMLButtonElement>('.enquiry__submit');
     const endpoint = form.dataset.endpoint ?? '';
     const fallbackEmail = form.dataset.fallbackEmail ?? '';
-    const fallbackPhone = form.dataset.fallbackPhone ?? '';
+
+    const fallback = form.querySelector<HTMLElement>('[data-form-fallback]');
+    const copyButton = form.querySelector<HTMLButtonElement>('[data-form-copy]');
 
     const fieldFor = (name: string) => form.elements.namedItem(name) as HTMLInputElement | null;
+    const valueOf = (name: string) => fieldFor(name)?.value.trim() ?? '';
+
+    /** The enquiry as a plain-text email, one labelled line per field. */
+    function emailBody(): string {
+      const lines = [
+        ['Name', valueOf('name')],
+        ['Company', valueOf('company')],
+        ['Email', valueOf('email')],
+        ['Phone', valueOf('phone')],
+        ['Needs built', valueOf('enquiryType')],
+      ]
+        .filter(([, value]) => value !== '')
+        .map(([label, value]) => `${label}: ${value}`);
+      return `${lines.join('\n')}\n\nAbout the project:\n${valueOf('message')}\n\nSent from the enquiry form on www.sav.construction`;
+    }
+
+    /**
+     * A mailto link for the enquiry. Some email apps cut links at about 2,000
+     * characters, so a very long message is shortened there; the full text
+     * stays in the form and the copy button.
+     */
+    function mailtoFor(body: string): string {
+      const company = valueOf('company');
+      const subject = `Website enquiry from ${valueOf('name')}${company ? `, ${company}` : ''}`;
+      const link = (text: string) => `mailto:${fallbackEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+      const shortened = (keep: number) =>
+        link(`${body.slice(0, keep)}\n\n[Message shortened. The full text is in the form on the website.]`);
+      if (link(body).length <= 1900) return link(body);
+      // Encoding lengthens text unevenly, so trim until the link fits.
+      let keep = body.length;
+      while (keep > 200 && shortened(keep).length > 1900) keep = Math.floor(keep * 0.9);
+      return shortened(keep);
+    }
+
+    // Copies the enquiry as it stands when clicked, for pasting into any email.
+    copyButton?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(emailBody());
+        copyButton.textContent = 'Message copied';
+      } catch {
+        copyButton.textContent = 'Copy failed: select the text in the form and copy it';
+      }
+    });
     const errorFor = (name: string) =>
       form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
 
@@ -239,12 +294,15 @@ const enquiryTypes = [
       }
 
       if (!endpoint) {
-        // Honest failure: the form is wired up but has nowhere to post yet.
+        // No sending service: hand the enquiry to the visitor's email app.
+        window.location.href = mailtoFor(emailBody());
         setStatus(
-          `Your message has not been sent: this form is not connected to an inbox yet. ` +
-            `Please email ${fallbackEmail} or call ${fallbackPhone} instead.`,
-          'error',
+          `Your email app should now open with your enquiry written out to ${fallbackEmail}. ` +
+            `Press send there to reach us. Your details stay in this form until you leave the page.`,
+          'success',
         );
+        if (fallback) fallback.hidden = false;
+        if (copyButton) copyButton.textContent = 'Copy my message';
         return;
       }
 
